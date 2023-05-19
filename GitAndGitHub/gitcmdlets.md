@@ -8,11 +8,14 @@ please see for full version:
 `git config` lets you get and set configuration variables that control all aspects of how Git looks and operates.
 
 These variables can be stored in three different places:
-1. --system option option
+1. **--system option**
+
 [path]/etc/gitconfig file: Contains values applied to every user on the system and all their repositories. Because this is a system configuration file, you would need administrative or superuser privilege to make changes to it.
-2. --global (user) option
+2. **--global (user) option**
+
 ~/.gitconfig or ~/.config/git/config file: Values specific personally to you, the user. 
-3. --local option (.git/config in repository)
+3. **--local option (.git/config in repository)**
+
 config file in the Git directory (that is, .git/config) of whatever repository you’re currently using: Specific to that single repository. 
 
 Each level overrides values in the previous level, so values in .git/config trump those in [path]/etc/gitconfig.
@@ -22,21 +25,21 @@ On Windows systems, Git looks for the .gitconfig file in the $HOME directory (C:
 You can view all of your settings and where they are coming from using:
 
 `git config --list --show-origin` 
-* sdfjad 
-file:C:/Program Files/Git/etc/gitconfig diff.astextplain.textconv=astextplain
-file:C:/Program Files/Git/etc/gitconfig filter.lfs.clean=git-lfs clean -- %f
-... snap ...
-file:C:/Users/MeisterW/.gitconfig       user.email=meister.wilhelm@hotmail.de
-file:C:/Users/MeisterW/.gitconfig       user.name=wmeister-fj
-... snap ...
-file:C:/Users/MeisterW/.gitconfig       init.defaultbranch=main
-file:.git/config        branch.main.remote=gh-learn-DevTools
-... snap ...
-file:.git/config        branch.main.merge=refs/heads/main *
+*file:C:/Program Files/Git/etc/gitconfig diff.astextplain.textconv=astextplain*
+*file:C:/Program Files/Git/etc/gitconfig filter.lfs.clean=git-lfs clean -- %f*
+*... snap ...*
+*file:C:/Users/MeisterW/.gitconfig       user.email=meister.wilhelm@hotmail.de*
+*file:C:/Users/MeisterW/.gitconfig       user.name=wmeister-fj*
+*... snap ...*
+*file:C:/Users/MeisterW/.gitconfig       init.defaultbranch=main*
+*file:.git/config        branch.main.remote=gh-learn-DevTools*
+*... snap ...*
+*file:.git/config        branch.main.merge=refs/heads/main*
 
 The first thing you should do when you install Git is to set your user name and email address. 
 
 `git config --global user.name "Wilhelm Meister"`
+
 `git config --global user.email meister.wilhelm@hotmail.de`  
 Again, you need to do this only once if you pass the --global option, because then Git will always use that information for anything you do on that system. If you want to override this with a different name or email address for specific projects, you can run the command without the --global option when you’re in that project.
 
