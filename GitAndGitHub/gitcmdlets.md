@@ -4,15 +4,16 @@ please see for full version:
 2. https://git-scm.com/book/en/v2 
 
 ## First-Time Git Setup https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup 
-Now that you have Git on your system, you’ll want to do a few things to customize your Git environment. You should have to do these things only once on any given computer; they’ll stick around between upgrades. You can also change them at any time by running through the commands again.
 
-Git comes with a tool called git config that lets you get and set configuration variables that control all aspects of how Git looks and operates. These variables can be stored in three different places:
+`git config` lets you get and set configuration variables that control all aspects of how Git looks and operates.
 
-[path]/etc/gitconfig file: Contains values applied to every user on the system and all their repositories. If you pass the option --system to git config, it reads and writes from this file specifically. Because this is a system configuration file, you would need administrative or superuser privilege to make changes to it.
-
-~/.gitconfig or ~/.config/git/config file: Values specific personally to you, the user. You can make Git read and write to this file specifically by passing the --global option, and this affects all of the repositories you work with on your system.
-
-config file in the Git directory (that is, .git/config) of whatever repository you’re currently using: Specific to that single repository. You can force Git to read from and write to this file with the --local option, but that is in fact the default. Unsurprisingly, you need to be located somewhere in a Git repository for this option to work properly.
+These variables can be stored in three different places:
+1. --system option option
+[path]/etc/gitconfig file: Contains values applied to every user on the system and all their repositories. Because this is a system configuration file, you would need administrative or superuser privilege to make changes to it.
+2. --global (user) option
+~/.gitconfig or ~/.config/git/config file: Values specific personally to you, the user. 
+3. --local option (.git/config in repository)
+config file in the Git directory (that is, .git/config) of whatever repository you’re currently using: Specific to that single repository. 
 
 Each level overrides values in the previous level, so values in .git/config trump those in [path]/etc/gitconfig.
 
@@ -20,12 +21,23 @@ On Windows systems, Git looks for the .gitconfig file in the $HOME directory (C:
 
 You can view all of your settings and where they are coming from using:
 
-$ git config --list --show-origin
-Your Identity
-The first thing you should do when you install Git is to set your user name and email address. This is important because every Git commit uses this information, and it’s immutably baked into the commits you start creating:
+`git config --list --show-origin` 
+* sdfjad 
+file:C:/Program Files/Git/etc/gitconfig diff.astextplain.textconv=astextplain
+file:C:/Program Files/Git/etc/gitconfig filter.lfs.clean=git-lfs clean -- %f
+... snap ...
+file:C:/Users/MeisterW/.gitconfig       user.email=meister.wilhelm@hotmail.de
+file:C:/Users/MeisterW/.gitconfig       user.name=wmeister-fj
+... snap ...
+file:C:/Users/MeisterW/.gitconfig       init.defaultbranch=main
+file:.git/config        branch.main.remote=gh-learn-DevTools
+... snap ...
+file:.git/config        branch.main.merge=refs/heads/main *
 
-$ git config --global user.name "John Doe"
-$ git config --global user.email johndoe@example.com
+The first thing you should do when you install Git is to set your user name and email address. 
+
+`git config --global user.name "Wilhelm Meister"`
+`git config --global user.email meister.wilhelm@hotmail.de`  
 Again, you need to do this only once if you pass the --global option, because then Git will always use that information for anything you do on that system. If you want to override this with a different name or email address for specific projects, you can run the command without the --global option when you’re in that project.
 
 Many of the GUI tools will help you do this when you first run them.
