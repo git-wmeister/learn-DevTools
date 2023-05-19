@@ -105,6 +105,7 @@ term
 That is so funny! :joy:
 
 (See also [Copying and Pasting Emoji](https://www.markdownguide.org/extended-syntax/#copying-and-pasting-emoji))
+(See also [list of emoji shortcodes](https://gist.github.com/rxaviers/7360908))
 
 ### Highlight
 
