@@ -2,32 +2,43 @@
 
 To do things in Vim you use **commands**. Commands are actions that have an effect in your editor. There's lots of different commands that do different things. **Motions** are commands that you use to move around in **Normal mode** (you'll soon learn that they are capable of a lot more).
 
-> ```
+> ```txt
 >            ↑
 >      ← h j k l →
 >          ↓
 > ```
 
 ## Moving Horizontally Word By Word
+
+Forwards  
+
 - `w` to move word by word
 - `W` to move word by WORD
+
+Backwards
 
 - `b` to move backwards word by word
 - `B` to move backwards WORD by WORD
 
+To the end
+
 - `e` to jump to the end of a word
 - `E` is like `e` but operates on WORDS
+
+To the end of previous
 
 - `ge` to jup to the end of the previous word
 - `gE` is like `ge` but operates on WORDS
 
 ## Move to a Specific Character
+
 - Use `f{character}` (find) to move to the next occurrence of a character in a line.
 - Use `F{character}` to find the previous occurrence of a character
 
-After using `f{character}` you can type 
-- `;` to go to the next occurrence of the character or 
-- `,` to go to the previous one. 
+After using `f{character}` you can type  
+
+- `;` to go to the next occurrence of the character or
+- `,` to go to the previous one.
 You can see the `;` and `,` as commands for repeating the last character search.
 
 ## Moving Horizontally Extremely
@@ -147,14 +158,14 @@ u               to Undo
 
 So far we've been focusing a lot in _Normal mode_ and we haven't paid much attention to _Insert mode_. Let's remedy that because there's a lot more to _Insert mode_ in Vim that you can imagine.
 
-- `i` lets you *i*nsert text before the cursor
-- `a` lets you *a*ppend text after the cursor
+- `i` lets you **i**nsert text before the cursor
+- `a` lets you **a**ppend text after the cursor
 
-- `I` lets you *i*nsert text at the beginning of a line
-- `A` lets you *a*ppend text at the end of a line
+- `I` lets you **i**nsert text at the beginning of a line
+- `A` lets you **a**ppend text at the end of a line
 
-- `o` lets you *o*pen a new line below the current line
-- `O` lets you *o*pen a new line above the current line
+- `o` lets you **o**pen a new line below the current line
+- `O` lets you **o**pen a new line above the current line
 
 
 - <CTRL-O> to come back here type 
