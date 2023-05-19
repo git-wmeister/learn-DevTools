@@ -1,6 +1,6 @@
 # git cheatsheet
 please see for full version:   
-**1. https://git-scm.com/docs** 
+**1. https://git-scm.com/docs**  
 **2. https://git-scm.com/book/en/v2** 
 
 ## First-Time Git Setup https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup 
@@ -8,13 +8,13 @@ please see for full version:
 `git config` lets you get and set configuration variables that control all aspects of how Git looks and operates.
 
 These variables can be stored in three different places:
-1. **--system option**  
+**1. --system option**  
 [path]/etc/gitconfig file: Contains values applied to every user on the system and all their repositories. Because this is a system configuration file, you would need administrative or superuser privilege to make changes to it.
 
-2. **--global (user) option**  
+**2. --global (user) option**  
 ~/.gitconfig or ~/.config/git/config file: Values specific personally to you, the user. 
 
-3. **--local option (.git/config in repository)**  
+**3. --local option (.git/config in repository)**  
 config file in the Git directory (that is, .git/config) of whatever repository you’re currently using: Specific to that single repository. 
 
 Each level overrides values in the previous level, so values in .git/config trump those in [path]/etc/gitconfig.
