@@ -42,13 +42,22 @@ After using `f{character}` you can type
 You can see the `;` and `,` as commands for repeating the last character search.
 
 ## Moving Horizontally Extremely
+
 - `0`: Moves to the first character of a line
-- `^`: Moves to the first non-blank character of a line
+- `^`: Moves to the first non-blank character of a line  
+
+```text
       ^ try in this line
+```
+
 - `$`: Moves to the end of a line
-- `g_`: Moves to the non-blank character at the end of a line _   
+- `g_`: Moves to the non-blank character at the end of a line _  
 - `+`: Moves to the first non-blank character of a NEXT line
 - `-`: Moves to the first non-blank character of a PREVIOUS line
+
+```txt
++
+   +
       +
          +
             +
@@ -56,8 +65,12 @@ You can see the `;` and `,` as commands for repeating the last character search.
       -
    -
 -
+```
+
 ## Moving Vertically
+
 Starting from `k` and `j`, we move on to a faster way of maneuvering vertically with:
+
 - `}` jumps entire paragraphs downwards
 - `{` similarly but upwards
 - `(` beginning of next sentence
@@ -66,8 +79,8 @@ Starting from `k` and `j`, we move on to a faster way of maneuvering vertically 
 - `CTRL-U` lets you move up half a page also by scrolling
 - `CTRL-O` move to last position
 
-
 ## High Precision Vertical Motions With Search Pattern
+
 - `/{pattern}`    to search forward
 - `?{pattern}`    to search backwards
 
@@ -79,12 +92,15 @@ Try using the following search command to find second level headings in this doc
 - Type `/## .*`
 
 ## Moving Faster With Counts
+
 - `2w` to move two words ahead
-- `5j` to jump file lines below 
-- `2/cuc` jumping to the second **cuc**umber 
+- `5j` to jump file lines below
+- `2/cuc` jumping to the second **cuc**umber
 
 ## And Some More Nifty Core Motions
+
 These are yet more motions that can come in handy from time to time:
+
 - Type `gg` to go to the top of the file.
 - Use `{line}gg` to go to a specific line.
 - Use `G` to go to the end of the file.
@@ -92,6 +108,7 @@ These are yet more motions that can come in handy from time to time:
 
 Try going back to the top of this file with `gg`, then come back with `G`.
 And now jump between these two matching brackets until you want to go to sleep:
+
 ```typescript
              start here f[%
                  \
@@ -108,7 +125,7 @@ To do things in Vim you use **commands**. Commands are actions that have an effe
 
 You use **operators** in combination with **counts** and **motions** to define the range of text to which an action applies:
 
-```
+```txt
    what to do (delete, change...)
       /
      /      how many times
@@ -124,31 +141,32 @@ You use **operators** in combination with **counts** and **motions** to define t
 
 For example, take `d2w`. It tells Vim to **d**elete **2** **w**ords. Try it!
 
+ Do you have a problem remembering all the motions? A great way to remember the different commands is to take advantage of mnemonics, as oftentimes the commands will be the first letter of a word which describes what they do:
 
-> Do you have a problem remembering all the motions? A great way to remember the different commands is to take advantage of mnemonics, as oftentimes the commands will be the first letter of a word which describes what they do:
->
 > - d for **d**elete
 > - f for **f**ind
 > - c for **c**hange
 > - t for un**T**il
 
 Mini-refresher: The **`d`** command
+
 > - d{motion} - delete text covered by motion
->   - d2w => deletes two words
->   - dt; => delete until ;
->   - d/hello => delete until hello
+> - d{motion} - delete text covered by motion
+> - d2w => deletes two words
+> - dt; => delete until ;
+> - d/hello => delete until hello
 
 ## Practice dd and D (Operator shorthand syntax)
+
 `dd` lets you delete a complete line of text.
 `D` is also really useful, it removes everything from the cursor until the end of the line (it is equivalent to `d$` but easier to type). 
 
 ## The Dot Operator
+
 One of the most amazing operators in Vim is the dot operator or `.`. The dot operator allows you to **repeat your last change**. With one single keystroke `.` you can repeat a complete change that can be composed of as many keystrokes as you can imagine.
 
-
-
-
 ### Last Entry Point to Edit ####
+
 ### HERE to finish ###
 
 u               to Undo
@@ -167,8 +185,7 @@ So far we've been focusing a lot in _Normal mode_ and we haven't paid much atten
 - `o` lets you **o**pen a new line below the current line
 - `O` lets you **o**pen a new line above the current line
 
-
-- <CTRL-O> to come back here type 
+- <CTRL-O> to come back here type
 
 The next handy mapping to jump into _Insert mode_ is `gi`. `gi` let's you go back to the last place where you made a change.
 

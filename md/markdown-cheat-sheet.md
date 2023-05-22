@@ -1,6 +1,6 @@
 # Markdown Cheat Sheet
 
-Thanks for visiting [The Markdown Guide](https://www.markdownguide.org)!
+Thanks for visiting [The Markdown Guide][markdownguide]!
 
 This Markdown cheat sheet provides a quick overview of all the Markdown syntax elements. It can’t cover every edge case, so if you need more information about any of these elements, refer to the reference guides for [basic syntax](https://www.markdownguide.org/basic-syntax) and [extended syntax](https://www.markdownguide.org/extended-syntax).
 
@@ -10,19 +10,46 @@ These are the elements outlined in John Gruber’s original design document. All
 
 ### Heading
 
+Above "Heading 3" with `### Heading` was used.
+
 # H1
+
+For "Heading 1" you can use `# H1`
 
 ## H2
 
+For "Heading 2" you can use `# H2`
+
 ### H3
+
+For "Heading 3" you can use `# H3`
 
 ### Bold
 
-**bold text**
+For **bold text** please write `**bold text**`
 
 ### Italic
 
-*italicized text*
+For *italicized text* please write `*italicized text*`
+
+### Underline
+
+++this text should be underlined++ but sometimes you have to use HTML instead of `++underline++`
+
+You can just use HTML markups in mark down.  
+If you want to underline, italic or strong, use follows,
+
+<u>
+  this is underlined
+</u>
+
+<i>
+  this is italic
+</i>
+
+<strong>
+  this is strong/Bold
+</strong>  
 
 ### Blockquote
 
@@ -50,11 +77,11 @@ These are the elements outlined in John Gruber’s original design document. All
 
 ### Link
 
-[Markdown Guide](https://www.markdownguide.org)
+[Markdown Guide][markdownguide]
 
 ### Image
 
-![alt text](https://www.markdownguide.org/assets/images/tux.png)
+![alt text e.g. Linux Pinguin][LinuxPinguinImage]
 
 ## Extended Syntax
 
@@ -90,11 +117,22 @@ Here's a sentence with a footnote. [^1]
 ### Definition List
 
 term
-: definition
+: definition  
+term2
+: definition2
+
+### New Line
+
+For new line please add two "spaces" at the end of the line."  "  
+Otherwise you will not see this sentence in starting in a new line.
+
+Alternatively you can add just an empty line above.
 
 ### Strikethrough
 
 ~~The world is flat.~~
+
+For ~~Strikethrough~~ please write `~~Strikethrough~~`
 
 ### Task List
 
@@ -104,7 +142,13 @@ term
 
 ### Emoji
 
-That is so funny! :joy:
+That is so funny! :joy:  
+Gone camping! :tent: Be back soon.
+
+```txt
+That is so funny! :joy:  
+Gone camping! :tent: Be back soon.
+```
 
 (See also [Copying and Pasting Emoji](https://www.markdownguide.org/extended-syntax/#copying-and-pasting-emoji))  
 (See also [list of emoji shortcodes](https://gist.github.com/rxaviers/7360908))
@@ -120,3 +164,6 @@ H~2~O
 ### Superscript
 
 X^2^
+
+[LinuxPinguinImage]: https://www.markdownguide.org/assets/images/tux.png
+[markdownguide]: https://www.markdownguide.org
