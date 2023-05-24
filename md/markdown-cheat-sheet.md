@@ -167,3 +167,5 @@ X^2^
 
 [LinuxPinguinImage]: https://www.markdownguide.org/assets/images/tux.png
 [markdownguide]: https://www.markdownguide.org
+
+Thanks for visiting [The Markdown Guide][markdownguide]
