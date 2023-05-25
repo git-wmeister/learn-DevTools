@@ -9,13 +9,13 @@
 | <https://www.markdownguide.org/cheat-sheet> | Cheat Sheet |
 
 * Main Topic
-    * Subtopic1
+  * Subtopic1  
+       Some Points for subtopic1
 
-        Some Points for subtopic1
+  * Subtopic2
 
-    * Subtopic2
-
-        Some Points for subtopic2
+        Some Points for subtopic2 Line 1
+        Some Points for subtopic2 Line 2
 
 Type `&nbsp;` &nbsp; to add a single space.  
 Type `&ensp;` &ensp; to add 2 spaces.  
