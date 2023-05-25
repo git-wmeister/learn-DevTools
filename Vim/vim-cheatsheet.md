@@ -235,8 +235,8 @@ USEFUL OPERATORS
 Some useful Vim operators
 In addition to d, there’s a handful more of handy operators:
 
-c (change): Change deletes a piece of text and then sends you into Insert mode so that you can continue typing, changing the original text into something else. The change operator is like the d and i commands combined into onetwo. This duality makes it the most useful operator
-y (yank): Copy in Vim jargon
+`c` (change): Change deletes a piece of text and then sends you into Insert mode so that you can continue typing, changing the original text into something else. The change operator is like the d and i commands combined into onetwo. This duality makes it the most useful operator  
+`y` (yank): Copy in Vim jargon  
 p (put): Paste in Vim jargon
 g~ (switch case): Changes letters from lowercase to uppercase and back. Alternatively, use gu to make something lowercase and gU to make something uppercase
 > (shift right): Adds indentation
