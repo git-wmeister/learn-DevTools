@@ -210,7 +210,9 @@ or the last act try to exit _Insert mode_ using these three commands and see whi
 - `CTRL-[`
 
 ## Editing Magic: operators
-EDITING LIKE MAGIC WITH VIM OPERATORS
+
+### EDITING LIKE MAGIC WITH VIM OPERATORS
+
 Motions aren’t just for moving. They can be used in combination with a series of commands called operators to edit your code at the speed of lightning.
 
 You can use operators and motions together by following any of these patterns:
