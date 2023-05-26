@@ -20,7 +20,7 @@ Here some links available via Help (F1) in VScode:
 | `Ctrl+Shift+M`| VScode Proble**M**s |
 | `Ctrl+Shift+U`| VScode o**U**tput |
 | `Ctrl+Shift+Y`| VScode **Y** Debug Console |
-| `Ctrl+ö` (US: `Ctrl++`) | Show/Hide integrated terminal |
-| `Ctrl+Shift+ö` (US: `Ctrl+Shift++`) | Create new (standard) terminal |
+| `Ctrl+ö` (US: **Ctrl+`**) | Show/Hide integrated terminal |
+| `Ctrl+Shift+ö` (US: **Ctrl+Shift+`**) | Create new (standard) terminal |
 
 [VScode shortcuts]:https://code.visualstudio.com/shortcuts/keyboard-shortcuts-windows.pdf
