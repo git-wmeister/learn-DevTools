@@ -25,16 +25,19 @@ On Windows systems, Git looks for the .gitconfig file in the $HOME directory (C:
 You can view all of your settings and where they are coming from using:
 
 `git config --list --show-origin`  
-*file:C:/Program Files/Git/etc/gitconfig diff.astextplain.textconv=astextplain*  
-*file:C:/Program Files/Git/etc/gitconfig filter.lfs.clean=git-lfs clean -- %f*  
-*... snap ...*  
-*file:C:/Users/MeisterW/.gitconfig       user.email=meister.wilhelm@hotmail.de*  
-*file:C:/Users/MeisterW/.gitconfig       user.name=wmeister-fj*  
-*... snap ...*  
-*file:C:/Users/MeisterW/.gitconfig       init.defaultbranch=main*  
-*file:.git/config        branch.main.remote=gh-learn-DevTools*  
-*... snap ...*  
-*file:.git/config        branch.main.merge=refs/heads/main*  
+
+```txt
+file:C:/Program Files/Git/etc/gitconfig diff.astextplain.textconv=astextplain  
+file:C:/Program Files/Git/etc/gitconfig filter.lfs.clean=git-lfs clean -- %f  
+... snap ...  
+file:C:/Users/MeisterW/.gitconfig       user.email=meister.wilhelm@hotmail.de  
+file:C:/Users/MeisterW/.gitconfig       user.name=wmeister-fj  
+... snap ...  
+file:C:/Users/MeisterW/.gitconfig       init.defaultbranch=main  
+file:.git/config        branch.main.remote=gh-learn-DevTools  
+... snap ...  
+file:.git/config        branch.main.merge=refs/heads/main  
+```
 
 The first thing you should do when you install Git is to set your user name and email address. 
 
@@ -89,3 +92,7 @@ Since Git might read the same configuration variable value from more than one fi
 
 $ git config --show-origin rerere.autoUpdate
 file:/home/johndoe/.gitconfig	false
+
+## Create a .gitignore file
+
+You can get examples of *.gitignore* file on [gitignore.io](https://www.toptal.com/developers/gitignore/) web page.
