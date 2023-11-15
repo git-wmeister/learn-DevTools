@@ -128,6 +128,12 @@ Otherwise you will not see this sentence in starting in a new line.
 
 Alternatively you can add just an empty line above.
 
+### Nummeric List
+
+1. First Item
+2. Zweites Element
+3. Drei
+
 ### Strikethrough
 
 ~~The world is flat.~~
@@ -165,7 +171,10 @@ H~2~O
 
 X^2^
 
-[LinuxPinguinImage]: https://www.markdownguide.org/assets/images/tux.png
-[markdownguide]: https://www.markdownguide.org
+[LinuxPinguinImage]: https://www.markdownguide.org/assets/images/tux.png/
+[markdownguide]: https://www.markdownguide.org/
 
 Thanks for visiting [The Markdown Guide][markdownguide]
+
+``` json
+{}

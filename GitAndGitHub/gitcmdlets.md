@@ -1,9 +1,21 @@
-# git cheatsheet
-please see for full version:   
-**1. https://git-scm.com/docs**  
-**2. https://git-scm.com/book/en/v2** 
 
-## First-Time Git Setup 
+# git cheatsheet
+
+please see for full version:
+
+**1. [git-scm docs](https://git-scm.com/docs)**
+
+**2. [git-scm book](https://git-scm.com/book/en/v2)**
+
+First Term
+: This is the definition of the first term.
+
+Second Term
+: This is one definition of the second term.
+: This is another definition of the second term.
+
+## First-Time Git Setup
+
 Source: https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup 
 
 `git config` lets you get and set configuration variables that control all aspects of how Git looks and operates.
