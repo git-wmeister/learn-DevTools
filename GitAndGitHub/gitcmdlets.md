@@ -7,12 +7,18 @@ please see for full version:
 
 **2. [git-scm book](https://git-scm.com/book/en/v2)**
 
-First Term
-: This is the definition of the first term.
+Git is a version control system (VCS). Another name for a VCS is a software configuration management (SCM) system. The two terms often are used interchangeably.
 
-Second Term
-: This is one definition of the second term.
-: This is another definition of the second term.
+## [Additional Resources](https://learn.microsoft.com/en-gb/training/modules/intro-to-git/5-summary)
+
+If you'd like to dig deeper, here are more resources:
+
+* Run the `git help tutorial` and `git help tutorial-2` commands.
+* Visit the [Everyday Git](https://git-scm.com/docs/everyday) site or use the `git help everyday` command.
+* Review [Git and GitHub learning resources](https://help.github.com/en/articles/git-and-github-learning-resources).
+* Watch the [Introduction to Git Recap](https://www.youtube.com/watch?v=9uGS1ak_FGg%3Fazure-portal%3Dtrue) video.
+* Check out the [documentation section](https://git-scm.com/doc) of [Git's official website](https://git-scm.com/).
+
 
 ## First-Time Git Setup
 
@@ -102,9 +108,10 @@ John Doe
 Note
 Since Git might read the same configuration variable value from more than one file, it’s possible that you have an unexpected value for one of these values and you don’t know why. In cases like that, you can query Git as to the origin for that value, and it will tell you which configuration file had the final say in setting that value:
 
-$ git config --show-origin rerere.autoUpdate
+$ git config --show-origin rerere.autoUpdate  
 file:/home/johndoe/.gitconfig	false
 
 ## Create a .gitignore file
 
 You can get examples of *.gitignore* file on [gitignore.io](https://www.toptal.com/developers/gitignore/) web page.
+
