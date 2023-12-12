@@ -1,14 +1,58 @@
 # Moving Blazingly Fast with Vim Motions
 
+This document based on VS Code Extension "Learn Vim" and "Learning the vi and Vim Editors" by Arnold Robbins, Elbert Hannah & Linda Lamb, O'Reilly.
+
 To do things in Vim you use **commands**. Commands are actions that have an effect in your editor. There's lots of different commands that do different things. **Motions** are commands that you use to move around in **Normal mode** (you'll soon learn that they are capable of a lot more).
 
-> ```txt
->            ↑
->      ← h j k l →
->          ↓
-> ```
+```txt
+          ↑
+     ← h j k l →
+          ↓
+```
 
-## Moving Horizontally Word By Word
+## 2. Moving Around
+
+### 2.1 Moving Aroung in a Hurry
+
+#### 2.1.1 Movement by Screens
+
+#### Scrolling the Screen
+
+> `CTRL-f`    Scroll forward one screen.  
+`CTRL-b`    Scroll backward one screen.  
+`CTRL-d`    Scroll forward one half screen (down).  
+`CTRL-u`    Scroll backward one half screen (up).  
+
+#### Repositioning the Screen with `z`
+
+> `z`+`ENTER` Move current line to top of screen and scroll.  
+`z.`        Move current line to center of screen and scroll.  
+`z-`        Move current line to bottom of screen and scroll.  
+
+#### jumping back and forth in Normal mode
+
+Find yourself working on a large file? Or perhaps handling multiple buffers? Vim makes it easy to navigate previous locations:
+
+`Ctrl+o` navigate to the previous location in the jump list (think o as old)  
+`Ctrl+i` navigate to the next location in the jump list (i and o are usually next to each other)  
+`g;`     go to the previous change location i
+`g,`     go to the newer change location  
+
+`'.`     Jump to last modification line  
+``.`     Jump to exact spot in last modification line  
+
+#### Movement Within a Screen
+
+`H`         Move to home - the top line on screen  
+`M`         Move to middle line on screen  
+`L`         Move to last line on screen  
+*n*`H`      Move to *n* line below top line  
+*n*`L`      Move to *n* lines above last line  
+*n*`L`      Move to last line on screen  
+
+# From here please change the headers 
+
+### Moving Horizontally Word Test By Word
 
 Forwards  
 
@@ -75,9 +119,9 @@ Starting from `k` and `j`, we move on to a faster way of maneuvering vertically 
 - `{` similarly but upwards
 - `(` beginning of next sentence
 - `)` beginning of next sentence
-- `CTRL-D` lets you move down half a page by scrolling the page
-- `CTRL-U` lets you move up half a page also by scrolling
-- `CTRL-O` move to last position
+- `CTRL-d` lets you move down half a page by scrolling the page
+- `CTRL-u` lets you move up half a page also by scrolling
+- `CTRL-o` move to last position
 
 ## High Precision Vertical Motions With Search Pattern
 
@@ -97,7 +141,7 @@ Try using the following search command to find second level headings in this doc
 - `5j` to jump file lines below
 - `2/cuc` jumping to the second **cuc**umber
 
-## And Some More Nifty Core Motions
+### And Some More Nifty Core Motions
 
 These are yet more motions that can come in handy from time to time:
 
@@ -117,7 +161,7 @@ And now jump between these two matching brackets until you want to go to sleep:
 const bagOfFoods = [["cucumber"], ["tomato", "potato"]];
 ```
 
-# Editing Like Magic With Vim Operators
+### Editing Like Magic With Vim Operators
 
 To do things in Vim you use **commands**. Commands are actions that have an effect in your editor. There's lots of different commands that do different things. Earlier we saw how **motions** let you move around in **Normal mode**.
 

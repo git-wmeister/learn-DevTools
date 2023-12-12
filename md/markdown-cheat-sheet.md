@@ -4,6 +4,14 @@ Thanks for visiting [The Markdown Guide][markdownguide]!
 
 This Markdown cheat sheet provides a quick overview of all the Markdown syntax elements. It can’t cover every edge case, so if you need more information about any of these elements, refer to the reference guides for [basic syntax](https://www.markdownguide.org/basic-syntax) and [extended syntax](https://www.markdownguide.org/extended-syntax).
 
+## VS Code Extention: learn-markdown
+
+### How to use the extension
+
+To access the Learn Markdown menu, type `ALT+M`. You can click or use up/down arrows to select the function you want, or type to start filtering, then hit `ENTER` when the function you want is highlighted in the menu.
+
+![Laern-Markdown Alt+M!](./images/Learn-Markdown_Alt+M.png "Alt+M")
+
 ## Basic Syntax
 
 These are the elements outlined in John Gruber’s original design document. All Markdown applications support these elements.
@@ -171,7 +179,7 @@ H~2~O
 
 X^2^
 
-[LinuxPinguinImage]: https://www.markdownguide.org/assets/images/tux.png/
+[LinuxPinguinImage]: https://www.markdownguide.org/assets/images/tux.png
 [markdownguide]: https://www.markdownguide.org/
 
 Thanks for visiting [The Markdown Guide][markdownguide]

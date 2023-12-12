@@ -34,6 +34,3 @@ And here's another paragraph that's visible.
 Nummeric List:
 1. sdkjfakf
 2. sdafj
-
-
-[sdjafjs]
