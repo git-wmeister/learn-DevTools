@@ -2,6 +2,8 @@
 
 Here some links available via Help (F1) in VScode:  
 [VScode Keyboard Shortcuts Reference][VScode shortcuts] (within VScode you can use `Ctrl+K Ctrl+R` shortcut to open this link)  
+You can also open **Keyboard Shortcuts** within VScode as a tab with `Ctrl+K Ctrl+S` (It does not work, if you are working within a document with VScode editor. You shoud e.g. open a terminal with `Ctrl+ö` or "leave" Editor.)  
+
 [Tips and Tricks](https://code.visualstudio.com/docs/getstarted/tips-and-tricks#vscode)  
 [Video Tutorials](https://code.visualstudio.com/docs/getstarted/introvideos#VSCode)  
 

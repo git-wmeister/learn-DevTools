@@ -1,36 +1,191 @@
-# md cheatsheet
+# Markdown Cheat Sheet
 
-**Here some links which were usede as sorce for this file**  
-<https://www.markdownguide.org/>  
+Thanks for visiting [The Markdown Guide][markdownguide]!
 
-| Link | Desription |
-| :---: | :--- |
-| <https://www.markdownguide.org/basic-syntax> | Basic Syntax |
-| <https://www.markdownguide.org/cheat-sheet> | Cheat Sheet |
+This Markdown cheat sheet provides a quick overview of all the Markdown syntax elements. It can’t cover every edge case, so if you need more information about any of these elements, refer to the reference guides for [basic syntax](https://www.markdownguide.org/basic-syntax) and [extended syntax](https://www.markdownguide.org/extended-syntax).
 
-* Main Topic
-  * Subtopic1  
-       Some Points for subtopic1
+## VS Code Extention: learn-markdown
 
-  * Subtopic2
+### How to use the extension
 
-        Some Points for subtopic2 Line 1
-        Some Points for subtopic2 Line 2
+To access the Learn Markdown menu, type `ALT+M`. You can click or use up/down arrows to select the function you want, or type to start filtering, then hit `ENTER` when the function you want is highlighted in the menu.
 
-Type `&nbsp;` &nbsp; to add a single space.  
-Type `&ensp;` &ensp; to add 2 spaces.  
-Type `&emsp;` &emsp; to add 4 spaces.  
+![Laern-Markdown Alt+M!](./images/Learn-Markdown_Alt+M.png "Alt+M")
 
-```txt
-[This is a comment that will be hidden.]: #
+## Basic Syntax
+
+These are the elements outlined in John Gruber’s original design document. All Markdown applications support these elements.
+
+### Heading
+
+Above "Heading 3" with `### Heading` was used.
+
+<!-- This section provides an overview of 
+# H1 - "Heading 1"
+
+For "Heading 1" you can use `# H1`
+
+Markdown syntax -->
+
+## H2
+
+For "Heading 2" you can use `# H2`
+
+### H3
+
+For "Heading 3" you can use `# H3`
+
+### Bold
+
+For **bold text** please write `**bold text**`
+
+### Italic
+
+For *italicized text* please write `*italicized text*`
+
+### Underline
+
+++this text should be underlined++ but sometimes you have to use HTML instead of `++underline++`
+
+You can just use HTML markups in mark down.  
+If you want to underline, italic or strong, use follows,
+
+<u>
+  this is underlined
+</u>
+
+<i>
+  this is italic
+</i>
+
+<strong>
+  this is strong/Bold
+</strong>  
+
+### Blockquote
+
+> blockquote
+
+### Ordered List
+
+1. First item
+2. Second item
+3. Third item
+
+### Unordered List
+
+- First item
+- Second item
+- Third item
+
+### Code
+
+`code`
+
+### Horizontal Rule
+
+---
+
+### Link
+
+[Markdown Guide][markdownguide]
+
+### Image
+
+![alt text e.g. Linux Pinguin][LinuxPinguinImage]
+
+## Extended Syntax
+
+These elements extend the basic syntax by adding additional features. Not all Markdown applications support these elements.
+
+### Table
+
+| Syntax | Description |
+| ----------- | ----------- |
+| Header | Title |
+| Paragraph | Text |
+
+### Fenced Code Block
+
+```json
+{
+  "firstName": "John",
+  "lastName": "Smith",
+  "age": 25
+}
 ```
 
-Here's a paragraph that will be visible.
+### Footnote
 
-[This is a comment that will be hidden.]: #
+Here's a sentence with a footnote. [^1]
 
-And here's another paragraph that's visible.  
+[^1]: This is the footnote.
 
-Nummeric List:
-1. sdkjfakf
-2. sdafj
+### Heading ID
+
+### My Great Heading {#custom-id}
+
+### Definition List
+
+term
+: definition  
+term2
+: definition2
+
+### New Line
+
+For new line please add two "spaces" at the end of the line."  "  
+Otherwise you will not see this sentence in starting in a new line.
+
+Alternatively you can add just an empty line above.
+
+### Nummeric List
+
+1. First Item
+2. Zweites Element
+3. Drei
+
+### Strikethrough
+
+~~The world is flat.~~
+
+For ~~Strikethrough~~ please write `~~Strikethrough~~`
+
+### Task List
+
+- [x] Write the press release
+- [ ] Update the website
+- [ ] Contact the media
+
+### Emoji
+
+That is so funny! :joy:  
+Gone camping! :tent: Be back soon.
+
+```txt
+That is so funny! :joy:  
+Gone camping! :tent: Be back soon.
+```
+
+(See also [Copying and Pasting Emoji](https://www.markdownguide.org/extended-syntax/#copying-and-pasting-emoji))  
+(See also [list of emoji shortcodes](https://gist.github.com/rxaviers/7360908))
+
+### Highlight
+
+I need to highlight these ==very important words==.
+
+### Subscript
+
+H~2~O
+
+### Superscript
+
+X^2^
+
+[LinuxPinguinImage]: https://www.markdownguide.org/assets/images/tux.png
+[markdownguide]: https://www.markdownguide.org/
+
+Thanks for visiting [The Markdown Guide][markdownguide]
+
+``` json
+{}

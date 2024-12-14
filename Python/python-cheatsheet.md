@@ -1,6 +1,12 @@
-# Markdown Cheat Sheet
+# Python Cheat Sheet
 
-Thanks for visiting [The Markdown Guide][markdownguide]!
+Thanks for visiting [Python for beginners][beginner-python] on microsoft learn webpage!
+
+[beginner-python]: https://learn.microsoft.com/en-gb/training/paths/beginner-python/
+
+## End of Python section below you will find old version of md-cheatsheet.md
+
+<!-- below is a copy of ../md/md-cheatsheet.md file from 03.12.2024 -->
 
 This Markdown cheat sheet provides a quick overview of all the Markdown syntax elements. It can’t cover every edge case, so if you need more information about any of these elements, refer to the reference guides for [basic syntax](https://www.markdownguide.org/basic-syntax) and [extended syntax](https://www.markdownguide.org/extended-syntax).
 
@@ -20,9 +26,12 @@ These are the elements outlined in John Gruber’s original design document. All
 
 Above "Heading 3" with `### Heading` was used.
 
-# H1
+<!-- This section provides an overview of 
+# H1 - "Heading 1"
 
 For "Heading 1" you can use `# H1`
+
+Markdown syntax -->
 
 ## H2
 
@@ -42,22 +51,15 @@ For *italicized text* please write `*italicized text*`
 
 ### Underline
 
-++this text should be underlined++ but sometimes you have to use HTML instead of `++underline++`
+++this text should be underlined++ but sometimes you have to use HTML instead of `++underline++`  
 
-You can just use HTML markups in mark down.  
-If you want to underline, italic or strong, use follows,
+Here HTML syntax for unerlinded text  
+`<u> this text should be unerlinded </u>`  
+Normaly you would not use HTML syntax in MarkDown file.  
 
 <u>
-  this is underlined
+   this text should be unerlinded
 </u>
-
-<i>
-  this is italic
-</i>
-
-<strong>
-  this is strong/Bold
-</strong>  
 
 ### Blockquote
 
@@ -85,7 +87,7 @@ If you want to underline, italic or strong, use follows,
 
 ### Link
 
-[Markdown Guide][markdownguide]
+[Markdown Guide][beginner-python]
 
 ### Image
 
@@ -177,12 +179,4 @@ H~2~O
 
 ### Superscript
 
-X^2^
-
 [LinuxPinguinImage]: https://www.markdownguide.org/assets/images/tux.png
-[markdownguide]: https://www.markdownguide.org/
-
-Thanks for visiting [The Markdown Guide][markdownguide]
-
-``` json
-{}
