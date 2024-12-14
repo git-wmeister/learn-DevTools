@@ -50,11 +50,7 @@ Find yourself working on a large file? Or perhaps handling multiple buffers? Vim
 *n*`L`      Move to *n* lines above last line  
 *n*`L`      Move to last line on screen  
 
-# From here please change the headers 
-
-### Moving Horizontally Word Test By Word
-
-Forwards  
+#### Moving Horizontally Word Test By Word
 
 - `w` to move word by word
 - `W` to move word by WORD
@@ -74,7 +70,7 @@ To the end of previous
 - `ge` to jup to the end of the previous word
 - `gE` is like `ge` but operates on WORDS
 
-## Move to a Specific Character
+#### Move to a Specific Character
 
 - Use `f{character}` (find) to move to the next occurrence of a character in a line.
 - Use `F{character}` to find the previous occurrence of a character
@@ -85,33 +81,34 @@ After using `f{character}` you can type
 - `,` to go to the previous one.
 You can see the `;` and `,` as commands for repeating the last character search.
 
-## Moving Horizontally Extremely
+#### Moving Horizontally Extremely
 
 - `0`: Moves to the first character of a line
 - `^`: Moves to the first non-blank character of a line  
+- `gm`: Moves to the middle of a line
+- `$`: Moves to the end of a line
+- `g_`: Moves to the non-blank character at the end of a line _  
 
 ```text
       ^ try in this line
 ```
 
-- `$`: Moves to the end of a line
-- `g_`: Moves to the non-blank character at the end of a line _  
 - `+`: Moves to the first non-blank character of a NEXT line
 - `-`: Moves to the first non-blank character of a PREVIOUS line
 
 ```txt
-+
-   +
-      +
-         +
-            +
++   
+   +   
+      +   
+         +   
+            +      
          -
       -
    -
 -
 ```
 
-## Moving Vertically
+#### Moving Vertically
 
 Starting from `k` and `j`, we move on to a faster way of maneuvering vertically with:
 
@@ -121,9 +118,11 @@ Starting from `k` and `j`, we move on to a faster way of maneuvering vertically 
 - `)` beginning of next sentence
 - `CTRL-d` lets you move down half a page by scrolling the page
 - `CTRL-u` lets you move up half a page also by scrolling
+- `CTRL-f` lets you move down a page by scrolling the page
+- `CTRL-b` lets you move up a page also by scrolling
 - `CTRL-o` move to last position
 
-## High Precision Vertical Motions With Search Pattern
+#### High Precision Vertical Motions With Search Pattern
 
 - `/{pattern}`    to search forward
 - `?{pattern}`    to search backwards
@@ -135,7 +134,7 @@ Try using the following search command to find second level headings in this doc
 
 - Type `/## .*`
 
-## Moving Faster With Counts
+#### Moving Faster With Counts
 
 - `2w` to move two words ahead
 - `5j` to jump file lines below
@@ -351,52 +350,6 @@ NOTICED HOW MOST VIM KEYS ARE PLACED NEAR YOUR FINGERS?
 The fact that Vim has modes allows keys near the home row to be reused in each separate mode. This design decision minimizes the need for slow and contorted key combinations, and heightens your speed and the longevity of your fingers and wrists. This is awesome!
 
 REPEATING THE LAST CHANGE WITH THE DOT OPERATOR
-Vim has yet another trick in store for you aimed at saving more keystrokes: The magic . (dot) command.
-
-Vim dot command repeats the last change
-The . command allows you to repeat the last change you made. Imagine that you run dd to delete a line of code. And now let’s say that you’ve warmed up to removing code. Removing code is good, the less code you have the less code you need to maintain. So let’s remove another line of code. How would you go about that? You could type dd again but, even better, you could use the . command which is just a single keystroke.
-
-OK. You save one keystroke. So What. (Tough crowd here I see). Well, you can use the . command to repeat any type of change, not just a single shorthand command like dd. For instance, you could change a word for Awesome like so cawAwesome<Enter>, and then repeat that whole command with all those keystrokes by just typing a single dot. Think of the possibilities!
-
-The . command becomes even more useful if you get in the habit of using Text-objects. Text-objects are more reliable than other motions because you don’t need to care as much where the cursor is positioned. Thus, commands with text objects are far more repeatable and therefore work beautifully in tandem with the . command.
-
-The . command works great in combination with the repeat search commands (;, ,, n or N). Imagine that you want to delete all occurrences of cucumber. A possible approach would be to search for cucumber /cucumber, delete it with daw and, from then on, use n to go to the next match and . to delete it! Two keystrokes!?! Again think of the possibilities!!
-
-MORE SHORTHAND TEXT EDITING COMMANDS
-In addition to the operators you’ve learned in this chapter, Vim offers a series of shortcuts to operate on single characters that can be useful on occasion. They are:
-
-x is equivalent to dl and deletes the character under the cursor
-X is equivalent to dh and deletes the character before the cursor
-s is equivalent to ch, deletes the character under the cursor and puts you into Insert mode
-~ to switch case for a single character
-As usual, all of the above support counts to operate on multiple characters at once.
-
-UNDOING AND REDOING
-Sooner or later it will come a time when you will make a mistake. Admit it! You ain’t perfect. Nobody is. And that is alright. You needn’t worry though, because Vim has your back:
-
-Type u and you’ll undo your last change,
-Type CTRL-R and you’ll redo it,
-Pheeewww…
-
-SUMMARY
-Motions aren’t just for moving. Used in combination with operators they let you perform operations on text with ease and amazing speed. You apply an operator on a motion by using the key melody {operator}{motion}.
-
-Some of the most useful and common operators are: d for delete, c for change, y for yank (copy) and p for put (paste). As you can appreciate from these operators and the motions you’ve learned thus far, Vim commands are generally easy to learn because they make sense and are easy to guess.
-
-When you double an operator you make it operate on a line. For instance, you can use dd to delete a complete line. In a similar fashion, when you capitalize a command it performs a stronger (or alternate) version of the original command. For example, D deletes from the cursor to the end of a line. These are really helpful and can save you a lot of time. Learn to use them instead of their more wordy alternatives.
-
-Counts also work with operators. You can multiply the effect of an operator motion combo by using a count like this: {operator}{count}{motion}.
-
-Text objects are special motions that describe the parts of a document: words, sentences, paragraphs, and such. They are incredibly useful in combination with Vim operators. Using operators with text-objects you can be very precise and command Vim to delete a word, or change the insides of a string or code block.
-
-Text objects offers two variants: the a (think a or all) and i (think inner) that allow you to operate on a text object plus surrounding whitespace or only on the inner parts of a text object respectively. For example, using da" deletes a complete quote including trailing whitespace, using di" only deletes whatever is surrounded by quotes.
-
-The dot command . lets you repeat the last change and, as such, it is one of the most useful repeater commands. Operations on text-objects are great candidates for the dot operator because they are more repeatable.
-
-A great way to take advantage of the dot command is by using it in combination with searches. When you do that you can apply changes of successive searches with just two keystrokes: n or ; to find the next match and . to repeat the last change.
-
-Sometimes you’ll make a mistake. When that happens, you can undo the last change with the u command. If you change your mind or undo too far, type CTRL-R to redo.
-
-To be more accurate, d2w allows you to delete all the text from the cursor until the beginning of the second word. For the time being, let’s just say that it deletes two words and we’ll get around to correctness soon enough.↩
-Two commands in one? Sounds great to me!↩
-← PREVIOUS CHAPTER: MOVING BLAZINGLY FAST WITH THE CORE VIM MOTIONS
+sjalfslakfj
+jfsalkdj
+klsdfjajfk
