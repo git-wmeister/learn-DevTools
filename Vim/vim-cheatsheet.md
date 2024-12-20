@@ -85,12 +85,14 @@ You can see the `;` and `,` as commands for repeating the last character search.
 
 - `0`: Moves to the first character of a line
 - `^`: Moves to the first non-blank character of a line  
+- `_`: Moves to the first non-blank character of a line  
 - `gm`: Moves to the middle of a line
 - `$`: Moves to the end of a line
 - `g_`: Moves to the non-blank character at the end of a line _  
 
 ```text
-      ^ try in this line
+      `^` try in this line and now 2 blac characters before `g_`
+      `_` try in this line and now 2 blac characters before `g_`
 ```
 
 - `+`: Moves to the first non-blank character of a NEXT line
@@ -217,7 +219,7 @@ One of the most amazing operators in Vim is the dot operator or `.`. The dot ope
 u               to Undo
 [Ctrl] + R      to Redo
 
-# Inserting Text
+## Inserting Text
 
 So far we've been focusing a lot in _Normal mode_ and we haven't paid much attention to _Insert mode_. Let's remedy that because there's a lot more to _Insert mode_ in Vim that you can imagine.
 
@@ -238,7 +240,7 @@ The next handy mapping to jump into _Insert mode_ is `gi`. `gi` let's you go bac
 
 > Notice how often `g` is used as a modifier of other commands. When you see `g` before a common command you can expect that the command will do something similar to the original command: For example, `gi` lets you go to the last place you left Insert mode (`i`), `ge` does the reverse of `e`, etc...
 
-# Removing stuff from Insert mode
+## Removing stuff from Insert mode
 
 By far the most common way of removing stuff when using Vim is using the `d` or `c` commands from _Normal mode_, however, sometimes it's useful to remove some text right from _Insert mode_ and continue typing. Most common example? When you make a typo! :D Whenever that happens any of these bindings may help:
 
@@ -353,3 +355,27 @@ REPEATING THE LAST CHANGE WITH THE DOT OPERATOR
 sjalfslakfj
 jfsalkdj
 klsdfjajfk
+
+
+### Some chapter created by GitHub Copilot
+
+#### Copy some text to buffer "b"
+To copy some text to buffer `"b` in Normal mode, you can use the `y` command followed by the buffer name and a motion. Here's how you can do it:
+
+1. Press `"` followed by `b` to specify the buffer.
+2. Use the `y` command followed by a motion to yank (copy) the text.
+
+For example, to copy a word to buffer `"b`:
+- Press `"` followed by `b`.
+- Press `y` followed by `w` (to yank a word).
+
+To copy a line to buffer `"b`:
+- Press `"` followed by `b`.
+- Press `yy` (to yank the current line).
+
+Here's a summary:
+
+```markdown
+- `"` followed by `b` then `yw` to yank a word to buffer `"b`.
+- `"` followed by `b` then `yy` to yank a line to buffer `"b`.
+```
