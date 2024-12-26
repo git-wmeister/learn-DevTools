@@ -50,3 +50,40 @@ print("The Moon And The Earth")
 print(".upper() method")
 print("The Moon And The Earth".upper())
 print()
+
+# Check content
+temperatures = "Mars Average Temperature: -60 C"
+parts = temperatures.split(':')
+print(parts)
+print(parts[-1])
+
+mars_temperature = "The highest temperature on Mars is about 30 C"
+for item in mars_temperature.split():
+    # isnumeric() method checks if all the in the text are numeric but does not include negative numbers
+    if item.isnumeric(): 
+        print(item)
+
+# Transform text
+print("Saturn has a daytime temperature of -170 degrees Celsius, while Mars has -28 Celsius.".replace("Celsius", "C"))
+
+# As mentioned earlier, .lower() is a good way to normalize text to do 
+# a case-insensitive search. Let's quickly check to see whether some text discusses temperatures:
+
+text = "Temperatures on the Moon can vary wildly."
+print("temperatures" in text)
+# Output: False
+
+text = "Temperatures on the Moon can vary wildly."
+print("temperatures" in text.lower())
+# Output: True
+
+# join() method
+# with moon_facts = ["1", "2", etc.] variable as a list
+moon_facts = ["The Moon is drifting away from the Earth.", "On average, the Moon is moving about 4cm every year."]
+type(moon_facts) # <class 'list'>, ordered, indexed and changeable with .add() method
+print(' '.join(moon_facts))
+
+# with moon_facts = {"1", "2", etc.} variable as a set
+moon_facts = {"The Moon is drifting away from the Earth.", "On average, the Moon is moving about 4cm every year."}
+type(moon_facts) # <class 'set'>, unordered, unindexed, unique (No Duplicates) and changeable with .append() method
+print(' '.join(moon_facts))
