@@ -1,0 +1,1814 @@
+{
+  "compatibilityLevel": 1567,
+  "model": {
+    "annotations": [
+      {
+        "name": "PBI_QueryOrder",
+        "value": "[\"F_DevOps_WorkItemStates\",\"D_StateLeadTimeSLA\",\"M_DevOps_WorkItems\",\"System State newValue\",\"F_DevOps_WorkItemStates_OLDversion\",\"df_orig\"]"
+      },
+      {
+        "name": "__PBI_TimeIntelligenceEnabled",
+        "value": "1"
+      },
+      {
+        "name": "PBIDesktopVersion",
+        "value": "2.138.1452.0 (24.11)"
+      },
+      {
+        "name": "PBI_ProTooling",
+        "value": "[\"DevMode\"]"
+      }
+    ],
+    "culture": "de-DE",
+    "cultures": [
+      {
+        "name": "de-DE",
+        "linguisticMetadata": {
+          "content": {
+            "Language": "en-US",
+            "Version": "1.0.0"
+          },
+          "contentType": "json"
+        }
+      }
+    ],
+    "dataAccessOptions": {
+      "legacyRedirects": true,
+      "returnErrorValuesAsNull": true
+    },
+    "defaultPowerBIDataSourceVersion": "powerBI_V3",
+    "expressions": [
+      {
+        "name": "F_DevOps_WorkItemStates_OLDversion",
+        "annotations": [
+          {
+            "name": "PBI_NavigationStepName",
+            "value": "Navigation"
+          },
+          {
+            "name": "PBI_ResultType",
+            "value": "Table"
+          }
+        ],
+        "expression": [
+          "let",
+          "    Quelle = Python.Execute(\"import base64#(lf)import json#(lf)import requests#(lf)import csv#(lf)import os, matplotlib#(lf)import pandas as pd#(lf)from datetime import datetime, timedelta#(lf)#(lf)def flatten_json(change_data):#(lf)    \"\"\"\"\"\"Flatten the JSON structure into a flat dictionary.\"\"\"\"\"\"#(lf)    if not isinstance(change_data, dict):#(lf)        raise ValueError(\"\"Input must be a dictionary.\"\")#(lf)#(lf)    flat_data = {}#(lf)#(lf)    def flatten_helper(data, parent_key=''):#(lf)        \"\"\"\"\"\"Recursive helper function to flatten the JSON.\"\"\"\"\"\"#(lf)        if isinstance(data, dict):#(lf)            for key, value in data.items():#(lf)                new_key = f\"\"{parent_key}.{key}\"\" if parent_key else key#(lf)                flatten_helper(value, new_key)#(lf)        elif isinstance(data, list):#(lf)            for index, item in enumerate(data):#(lf)                new_key = f\"\"{parent_key}.{index}\"\" if parent_key else str(index)#(lf)                flatten_helper(item, new_key)#(lf)        else:#(lf)            flat_data[parent_key] = data#(lf)#(lf)    flatten_helper(change_data)#(lf)    return flat_data#(lf)#(lf)def extract_data_to_csv(change_data):#(lf)    \"\"\"\"\"\"Convert given JSON data to a flat dictionary format for CSV.\"\"\"\"\"\"#(lf)    flat_data = flatten_json(change_data)#(lf)    return flat_data#(lf)#(lf)def fetch_work_item_histories(organization, project, api_version, pat, start_date, end_date):#(lf)    token = f':{pat}'#(lf)    encoded_token = base64.b64encode(token.encode()).decode()#(lf)    headers = {#(lf)        \"\"Authorization\"\": f\"\"Basic {encoded_token}\"\",#(lf)        \"\"Content-Type\"\": \"\"application/json\"\"#(lf)    }#(lf)#(lf)    all_work_item_histories = []#(lf)    current_start_date = start_date#(lf)#(lf)    # Define allowed fields for CSV#(lf)    allowed_fields = set([#(lf)        \"\"Work Item ID\"\",#(lf)        \"\"Update ID\"\",#(lf)        \"\"Updated By\"\",#(lf)        \"\"Update Date\"\",#(lf)        \"\"System.Title\"\",#(lf)        \"\"System.Description\"\",#(lf)        \"\"System.State.newValue\"\",#(lf)        \"\"System.Reason.newValue\"\",#(lf)        \"\"System.AssignedTo\"\",#(lf)        \"\"System.AuthorizedDate.newValue\"\",#(lf)        \"\"System.RevisedDate.newValue\"\",#(lf)        \"\"System.ChangedDate.newValue\"\",        #(lf)        \"\"System.History.newValue\"\",#(lf)        \"\"Microsoft.VSTS.Common.ActivatedDate.newValue\"\",#(lf)        \"\"Microsoft.VSTS.Common.ActivatedBy.newValue.displayName\"\",#(lf)        # Add other relevant fields as needed#(lf)    ])#(lf)#(lf)    while current_start_date < end_date:#(lf)        current_end_date = (current_start_date.replace(day=1) + timedelta(days=32)).replace(day=1) - timedelta(seconds=1)#(lf)#(lf)        wiql_query = {#(lf)            \"\"query\"\": (#(lf)                \"\"SELECT [System.Id], [System.WorkItemType], [System.Title], \"\"#(lf)                \"\"[System.AssignedTo], [System.State] FROM WorkItems \"\"#(lf)                f\"\"WHERE [System.TeamProject] = '{project}' \"\"#(lf)                f\"\"AND [System.CreatedDate] >= '{current_start_date.strftime('%Y-%m-%d')}' \"\"#(lf)                f\"\"AND [System.CreatedDate] <= '{current_end_date.strftime('%Y-%m-%d')}' \"\"#(lf)                \"\"ORDER BY [System.Id]\"\"#(lf)            )#(lf)        }#(lf)#(lf)        wiql_url = f\"\"https://dev.azure.com/{organization}/{project}/_apis/wit/wiql?api-version={api_version}\"\"#(lf)        response = requests.post(wiql_url, headers=headers, json=wiql_query)#(lf)#(lf)        if response.ok:#(lf)            try:#(lf)                data = response.json()#(lf)            except json.JSONDecodeError as e:#(lf)                print(f\"\"JSONDecodeError when parsing response: {e}\"\")#(lf)                continue#(lf)#(lf)            if not data.get('workItems'):#(lf)                print(f\"\"No work items found for the period {current_start_date.strftime('%Y-%m-%d')} to {current_end_date.strftime('%Y-%m-%d')}.\"\")#(lf)            else:#(lf)                for work_item in data['workItems']:#(lf)                    work_item_id = work_item['id']#(lf)                    history_url = f\"\"https://dev.azure.com/{organization}/{project}/_apis/wit/workitems/{work_item_id}/updates?api-version={api_version}\"\"#(lf)                    history_response = requests.get(history_url, headers=headers)#(lf)#(lf)                    if history_response.ok:#(lf)                        try:#(lf)                            history_data = history_response.json()#(lf)                        except json.JSONDecodeError as e:#(lf)                            print(f\"\"JSONDecodeError for work item {work_item_id}: {e}\"\")#(lf)                            continue#(lf)#(lf)                        for item in history_data.get('value', []):#(lf)                            history_entry = {#(lf)                                \"\"Work Item ID\"\": work_item_id,#(lf)                                \"\"Update ID\"\": item['id'],#(lf)                                \"\"Updated By\"\": item['revisedBy']['displayName'],#(lf)                                \"\"Update Date\"\": item['revisedDate']                                #(lf)                            }#(lf)#(lf)                            # Extract and flatten change data#(lf)                            change_data = item.get('fields', {})#(lf)                            data_as_csv = extract_data_to_csv(change_data)#(lf)#(lf)                            # Combine history entry with change data, filtering by allowed fields#(lf)                            combined_entry = {key: value for key, value in {**history_entry, **data_as_csv}.items() if key in allowed_fields}#(lf)                            all_work_item_histories.append(combined_entry)  # Append combined entry to the list                            #(lf)#(lf)                        print(f\"\"History for work item {work_item_id} successfully retrieved.\"\")#(lf)        #(lf)        else:#(lf)            print(f\"\"Failed to retrieve work items: {response.status_code} - {response.text}\"\")#(lf)#(lf)        current_start_date = current_end_date + timedelta(seconds=1)#(lf)#(lf)    return all_work_item_histories#(lf)#(lf)def save_to_csv(data, file_path):#(lf)    if data:#(lf)        # Collect all unique fieldnames from all entries#(lf)        fieldnames = set()#(lf)        for entry in data:#(lf)            fieldnames.update(entry.keys())#(lf)#(lf)        with open(file_path, mode='w', newline='', encoding='utf-8') as file:#(lf)            writer = csv.DictWriter(file, fieldnames=fieldnames, delimiter=';')#(lf)            writer.writeheader()#(lf)            writer.writerows(data)#(lf)#(lf)# Define parameters#(lf)organization = \"\"itvtmeu\"\"#(lf)project = \"\"ConnectMECore\"\"#(lf)api_version = \"\"6.0\"\"#(lf)pat = \"\"5lL9tTSit65jzLQhQActVDWJLLdY6WC1hEF3eZZABnCBzj4UMXVQJQQJ99AKACAAAAAmY8f4AAASAZDOYmLm\"\"  # Replace with actual PAT#(lf)start_date = datetime(2024, 11, 15)#(lf)end_date = datetime(2024, 11, 30)#(lf)csv_file = \"\"all_work_items_history_by_month.csv\"\"#(lf)#(lf)# Fetch work item histories#(lf)work_item_histories = fetch_work_item_histories(organization, project, api_version, pat, start_date, end_date)#(lf)#(lf)print(\"\"Got a response!\"\")#(lf)#(lf)if work_item_histories:#(lf)    df = pd.DataFrame(work_item_histories)#(lf)    df.to_csv (csv_file, index=False)#(lf)#(lf)\"),",
+          "    df1 = Quelle{[Name=\"df\"]}[Value],",
+          "    #\"Filtered Rows\" = Table.SelectRows(df1, each ([System.State.newValue] <> \"\")),",
+          "    #\"Removed Columns\" = Table.RemoveColumns(#\"Filtered Rows\",{\"Update Date\", \"System.AuthorizedDate.newValue\", \"Microsoft.VSTS.Common.ActivatedBy.newValue.displayName\", \"Microsoft.VSTS.Common.ActivatedDate.newValue\", \"System.History.newValue\"}),",
+          "    #\"Reordered Columns\" = Table.ReorderColumns(#\"Removed Columns\",{\"Work Item ID\", \"Update ID\", \"Updated By\", \"System.ChangedDate.newValue\", \"System.RevisedDate.newValue\", \"System.State.newValue\", \"System.Reason.newValue\"}),",
+          "    #\"Renamed Columns\" = Table.RenameColumns(#\"Reordered Columns\",{{\"Work Item ID\", \"WorkItem ID\"}, {\"System.ChangedDate.newValue\", \"System.ChangedDate\"}, {\"System.RevisedDate.newValue\", \"System.RevisedDate\"}, {\"System.State.newValue\", \"System.State\"}, {\"System.Reason.newValue\", \"System.Reason\"}}),",
+          "    #\"Changed Type\" = Table.TransformColumnTypes(#\"Renamed Columns\",{{\"WorkItem ID\", Int64.Type}, {\"Update ID\", Int64.Type}, {\"Updated By\", type text}, {\"System.ChangedDate\", type datetime}, {\"System.RevisedDate\", type datetime}, {\"System.State\", type text}, {\"System.Reason\", type text}}),",
+          "    #\"Changed Type DateTime2Date\" = Table.TransformColumnTypes(#\"Changed Type\",{{\"System.ChangedDate\", type date}, {\"System.RevisedDate\", type date}})",
+          "in",
+          "    #\"Changed Type DateTime2Date\""
+        ],
+        "kind": "m",
+        "lineageTag": "fe37f10d-3ca1-4846-b171-7b06adc6a879"
+      },
+      {
+        "name": "System State newValue",
+        "annotations": [
+          {
+            "name": "PBI_NavigationStepName",
+            "value": "Navigation"
+          },
+          {
+            "name": "PBI_ResultType",
+            "value": "Table"
+          }
+        ],
+        "expression": [
+          "let",
+          "    Quelle = Python.Execute(\"import base64#(lf)import json#(lf)import requests#(lf)import csv#(lf)import os, matplotlib#(lf)import pandas as pd#(lf)from datetime import datetime, timedelta#(lf)#(lf)def flatten_json(change_data):#(lf)    \"\"\"\"\"\"Flatten the JSON structure into a flat dictionary.\"\"\"\"\"\"#(lf)    if not isinstance(change_data, dict):#(lf)        raise ValueError(\"\"Input must be a dictionary.\"\")#(lf)#(lf)    flat_data = {}#(lf)#(lf)    def flatten_helper(data, parent_key=''):#(lf)        \"\"\"\"\"\"Recursive helper function to flatten the JSON.\"\"\"\"\"\"#(lf)        if isinstance(data, dict):#(lf)            for key, value in data.items():#(lf)                new_key = f\"\"{parent_key}.{key}\"\" if parent_key else key#(lf)                flatten_helper(value, new_key)#(lf)        elif isinstance(data, list):#(lf)            for index, item in enumerate(data):#(lf)                new_key = f\"\"{parent_key}.{index}\"\" if parent_key else str(index)#(lf)                flatten_helper(item, new_key)#(lf)        else:#(lf)            flat_data[parent_key] = data#(lf)#(lf)    flatten_helper(change_data)#(lf)    return flat_data#(lf)#(lf)def extract_data_to_csv(change_data):#(lf)    \"\"\"\"\"\"Convert given JSON data to a flat dictionary format for CSV.\"\"\"\"\"\"#(lf)    flat_data = flatten_json(change_data)#(lf)    return flat_data#(lf)#(lf)def fetch_work_item_histories(organization, project, api_version, pat, start_date, end_date):#(lf)    token = f':{pat}'#(lf)    encoded_token = base64.b64encode(token.encode()).decode()#(lf)    headers = {#(lf)        \"\"Authorization\"\": f\"\"Basic {encoded_token}\"\",#(lf)        \"\"Content-Type\"\": \"\"application/json\"\"#(lf)    }#(lf)#(lf)    all_work_item_histories = []#(lf)    current_start_date = start_date#(lf)#(lf)    # Define allowed fields for CSV#(lf)    allowed_fields = set([#(lf)        \"\"Work Item ID\"\",#(lf)        \"\"Update ID\"\",#(lf)        \"\"Updated By\"\",#(lf)        \"\"Update Date\"\",#(lf)        \"\"System.Title\"\",#(lf)        \"\"System.Description\"\",#(lf)        \"\"System.State.newValue\"\",#(lf)        \"\"System.Reason.newValue\"\",#(lf)        \"\"System.AssignedTo\"\",#(lf)        \"\"System.AuthorizedDate.newValue\"\",#(lf)        \"\"System.RevisedDate.newValue\"\",#(lf)        \"\"System.ChangedDate.newValue\"\",        #(lf)        \"\"System.History.newValue\"\",#(lf)        \"\"Microsoft.VSTS.Common.ActivatedDate.newValue\"\",#(lf)        \"\"Microsoft.VSTS.Common.ActivatedBy.newValue.displayName\"\",#(lf)        # Add other relevant fields as needed#(lf)    ])#(lf)#(lf)    while current_start_date < end_date:#(lf)        current_end_date = (current_start_date.replace(day=1) + timedelta(days=32)).replace(day=1) - timedelta(seconds=1)#(lf)#(lf)        wiql_query = {#(lf)            \"\"query\"\": (#(lf)                \"\"SELECT [System.Id], [System.WorkItemType], [System.Title], \"\"#(lf)                \"\"[System.AssignedTo], [System.State] FROM WorkItems \"\"#(lf)                f\"\"WHERE [System.TeamProject] = '{project}' \"\"#(lf)                f\"\"AND [System.CreatedDate] >= '{current_start_date.strftime('%Y-%m-%d')}' \"\"#(lf)                f\"\"AND [System.CreatedDate] <= '{current_end_date.strftime('%Y-%m-%d')}' \"\"#(lf)                \"\"ORDER BY [System.Id]\"\"#(lf)            )#(lf)        }#(lf)#(lf)        wiql_url = f\"\"https://dev.azure.com/{organization}/{project}/_apis/wit/wiql?api-version={api_version}\"\"#(lf)        response = requests.post(wiql_url, headers=headers, json=wiql_query)#(lf)#(lf)        if response.ok:#(lf)            try:#(lf)                data = response.json()#(lf)            except json.JSONDecodeError as e:#(lf)                print(f\"\"JSONDecodeError when parsing response: {e}\"\")#(lf)                continue#(lf)#(lf)            if not data.get('workItems'):#(lf)                print(f\"\"No work items found for the period {current_start_date.strftime('%Y-%m-%d')} to {current_end_date.strftime('%Y-%m-%d')}.\"\")#(lf)            else:#(lf)                for work_item in data['workItems']:#(lf)                    work_item_id = work_item['id']#(lf)                    history_url = f\"\"https://dev.azure.com/{organization}/{project}/_apis/wit/workitems/{work_item_id}/updates?api-version={api_version}\"\"#(lf)                    history_response = requests.get(history_url, headers=headers)#(lf)#(lf)                    if history_response.ok:#(lf)                        try:#(lf)                            history_data = history_response.json()#(lf)                        except json.JSONDecodeError as e:#(lf)                            print(f\"\"JSONDecodeError for work item {work_item_id}: {e}\"\")#(lf)                            continue#(lf)#(lf)                        for item in history_data.get('value', []):#(lf)                            history_entry = {#(lf)                                \"\"Work Item ID\"\": work_item_id,#(lf)                                \"\"Update ID\"\": item['id'],#(lf)                                \"\"Updated By\"\": item['revisedBy']['displayName'],#(lf)                                \"\"Update Date\"\": item['revisedDate']                                #(lf)                            }#(lf)#(lf)                            # Extract and flatten change data#(lf)                            change_data = item.get('fields', {})#(lf)                            data_as_csv = extract_data_to_csv(change_data)#(lf)#(lf)                            # Combine history entry with change data, filtering by allowed fields#(lf)                            combined_entry = {key: value for key, value in {**history_entry, **data_as_csv}.items() if key in allowed_fields}#(lf)                            all_work_item_histories.append(combined_entry)  # Append combined entry to the list                            #(lf)#(lf)                        print(f\"\"History for work item {work_item_id} successfully retrieved.\"\")#(lf)        #(lf)        else:#(lf)            print(f\"\"Failed to retrieve work items: {response.status_code} - {response.text}\"\")#(lf)#(lf)        current_start_date = current_end_date + timedelta(seconds=1)#(lf)#(lf)    return all_work_item_histories#(lf)#(lf)def save_to_csv(data, file_path):#(lf)    if data:#(lf)        # Collect all unique fieldnames from all entries#(lf)        fieldnames = set()#(lf)        for entry in data:#(lf)            fieldnames.update(entry.keys())#(lf)#(lf)        with open(file_path, mode='w', newline='', encoding='utf-8') as file:#(lf)            writer = csv.DictWriter(file, fieldnames=fieldnames, delimiter=';')#(lf)            writer.writeheader()#(lf)            writer.writerows(data)#(lf)#(lf)# Define parameters#(lf)organization = \"\"itvtmeu\"\"#(lf)project = \"\"ConnectMECore\"\"#(lf)api_version = \"\"6.0\"\"#(lf)pat = \"\"5lL9tTSit65jzLQhQActVDWJLLdY6WC1hEF3eZZABnCBzj4UMXVQJQQJ99AKACAAAAAmY8f4AAASAZDOYmLm\"\"  # Replace with actual PAT#(lf)start_date = datetime(2024, 5, 1)#(lf)end_date = datetime(2024, 11, 30)#(lf)csv_file = \"\"all_work_items_history_by_month.csv\"\"#(lf)#(lf)# Fetch work item histories#(lf)work_item_histories = fetch_work_item_histories(organization, project, api_version, pat, start_date, end_date)#(lf)#(lf)print(\"\"Got a response!\"\")#(lf)#(lf)if work_item_histories:#(lf)    df = pd.DataFrame(work_item_histories)#(lf)    df.to_csv (csv_file, index=False)#(lf)#(lf)\"),",
+          "    df1 = Quelle{[Name=\"df\"]}[Value],",
+          "    #\"System State newValue1\" = df1[System.State.newValue],",
+          "    #\"Entfernte Duplikate\" = List.Distinct(#\"System State newValue1\"),",
+          "    #\"Converted to Table\" = Table.FromList(#\"Entfernte Duplikate\", Splitter.SplitByNothing(), null, null, ExtraValues.Error),",
+          "    #\"Filtered Rows\" = Table.SelectRows(#\"Converted to Table\", each ([Column1] <> \"\")),",
+          "    #\"Renamed Columns\" = Table.RenameColumns(#\"Filtered Rows\",{{\"Column1\", \"System.State.newValue\"}}),",
+          "    #\"Changed Type\" = Table.TransformColumnTypes(#\"Renamed Columns\",{{\"System.State.newValue\", type text}})",
+          "in",
+          "    #\"Changed Type\""
+        ],
+        "kind": "m",
+        "lineageTag": "78df28bb-a874-486d-8678-e2032f195823"
+      },
+      {
+        "name": "df_orig",
+        "annotations": [
+          {
+            "name": "PBI_NavigationStepName",
+            "value": "Navigation"
+          },
+          {
+            "name": "PBI_ResultType",
+            "value": "Table"
+          }
+        ],
+        "expression": [
+          "let",
+          "    Quelle = Python.Execute(\"import base64#(lf)import json#(lf)import requests#(lf)import csv#(lf)import os, matplotlib#(lf)import pandas as pd#(lf)from datetime import datetime, timedelta#(lf)#(lf)def flatten_json(change_data):#(lf)    \"\"\"\"\"\"Flatten the JSON structure into a flat dictionary.\"\"\"\"\"\"#(lf)    if not isinstance(change_data, dict):#(lf)        raise ValueError(\"\"Input must be a dictionary.\"\")#(lf)#(lf)    flat_data = {}#(lf)#(lf)    def flatten_helper(data, parent_key=''):#(lf)        \"\"\"\"\"\"Recursive helper function to flatten the JSON.\"\"\"\"\"\"#(lf)        if isinstance(data, dict):#(lf)            for key, value in data.items():#(lf)                new_key = f\"\"{parent_key}.{key}\"\" if parent_key else key#(lf)                flatten_helper(value, new_key)#(lf)        elif isinstance(data, list):#(lf)            for index, item in enumerate(data):#(lf)                new_key = f\"\"{parent_key}.{index}\"\" if parent_key else str(index)#(lf)                flatten_helper(item, new_key)#(lf)        else:#(lf)            flat_data[parent_key] = data#(lf)#(lf)    flatten_helper(change_data)#(lf)    return flat_data#(lf)#(lf)def extract_data_to_csv(change_data):#(lf)    \"\"\"\"\"\"Convert given JSON data to a flat dictionary format for CSV.\"\"\"\"\"\"#(lf)    flat_data = flatten_json(change_data)#(lf)    return flat_data#(lf)#(lf)def fetch_work_item_histories(organization, project, api_version, pat, start_date, end_date):#(lf)    token = f':{pat}'#(lf)    encoded_token = base64.b64encode(token.encode()).decode()#(lf)    headers = {#(lf)        \"\"Authorization\"\": f\"\"Basic {encoded_token}\"\",#(lf)        \"\"Content-Type\"\": \"\"application/json\"\"#(lf)    }#(lf)#(lf)    all_work_item_histories = []#(lf)    current_start_date = start_date#(lf)#(lf)    # Define allowed fields for CSV#(lf)    allowed_fields = set([#(lf)        \"\"Work Item ID\"\",#(lf)        \"\"Update ID\"\",#(lf)        \"\"Updated By\"\",#(lf)        \"\"Update Date\"\",#(lf)        \"\"System.Title\"\",#(lf)        \"\"System.Description\"\",#(lf)        \"\"System.State.newValue\"\",#(lf)        \"\"System.Reason.newValue\"\",#(lf)        \"\"System.AssignedTo\"\",#(lf)        \"\"System.AuthorizedDate.newValue\"\",#(lf)        \"\"System.RevisedDate.newValue\"\",#(lf)        \"\"System.ChangedDate.newValue\"\",        #(lf)        \"\"System.History.newValue\"\",#(lf)        \"\"Microsoft.VSTS.Common.ActivatedDate.newValue\"\",#(lf)        \"\"Microsoft.VSTS.Common.ActivatedBy.newValue.displayName\"\",#(lf)        # Add other relevant fields as needed#(lf)    ])#(lf)#(lf)    while current_start_date < end_date:#(lf)        current_end_date = (current_start_date.replace(day=1) + timedelta(days=32)).replace(day=1) - timedelta(seconds=1)#(lf)#(lf)        wiql_query = {#(lf)            \"\"query\"\": (#(lf)                \"\"SELECT [System.Id], [System.WorkItemType], [System.Title], \"\"#(lf)                \"\"[System.AssignedTo], [System.State] FROM WorkItems \"\"#(lf)                f\"\"WHERE [System.TeamProject] = '{project}' \"\"#(lf)                f\"\"AND [System.CreatedDate] >= '{current_start_date.strftime('%Y-%m-%d')}' \"\"#(lf)                f\"\"AND [System.CreatedDate] <= '{current_end_date.strftime('%Y-%m-%d')}' \"\"#(lf)                \"\"ORDER BY [System.Id]\"\"#(lf)            )#(lf)        }#(lf)#(lf)        wiql_url = f\"\"https://dev.azure.com/{organization}/{project}/_apis/wit/wiql?api-version={api_version}\"\"#(lf)        response = requests.post(wiql_url, headers=headers, json=wiql_query)#(lf)#(lf)        if response.ok:#(lf)            try:#(lf)                data = response.json()#(lf)            except json.JSONDecodeError as e:#(lf)                print(f\"\"JSONDecodeError when parsing response: {e}\"\")#(lf)                continue#(lf)#(lf)            if not data.get('workItems'):#(lf)                print(f\"\"No work items found for the period {current_start_date.strftime('%Y-%m-%d')} to {current_end_date.strftime('%Y-%m-%d')}.\"\")#(lf)            else:#(lf)                for work_item in data['workItems']:#(lf)                    work_item_id = work_item['id']#(lf)                    history_url = f\"\"https://dev.azure.com/{organization}/{project}/_apis/wit/workitems/{work_item_id}/updates?api-version={api_version}\"\"#(lf)                    history_response = requests.get(history_url, headers=headers)#(lf)#(lf)                    if history_response.ok:#(lf)                        try:#(lf)                            history_data = history_response.json()#(lf)                        except json.JSONDecodeError as e:#(lf)                            print(f\"\"JSONDecodeError for work item {work_item_id}: {e}\"\")#(lf)                            continue#(lf)#(lf)                        for item in history_data.get('value', []):#(lf)                            history_entry = {#(lf)                                \"\"Work Item ID\"\": work_item_id,#(lf)                                \"\"Update ID\"\": item['id'],#(lf)                                \"\"Updated By\"\": item['revisedBy']['displayName'],#(lf)                                \"\"Update Date\"\": item['revisedDate']                                #(lf)                            }#(lf)#(lf)                            # Extract and flatten change data#(lf)                            change_data = item.get('fields', {})#(lf)                            data_as_csv = extract_data_to_csv(change_data)#(lf)#(lf)                            # Combine history entry with change data, filtering by allowed fields#(lf)                            combined_entry = {key: value for key, value in {**history_entry, **data_as_csv}.items() if key in allowed_fields}#(lf)                            all_work_item_histories.append(combined_entry)  # Append combined entry to the list                            #(lf)#(lf)                        print(f\"\"History for work item {work_item_id} successfully retrieved.\"\")#(lf)        #(lf)        else:#(lf)            print(f\"\"Failed to retrieve work items: {response.status_code} - {response.text}\"\")#(lf)#(lf)        current_start_date = current_end_date + timedelta(seconds=1)#(lf)#(lf)    return all_work_item_histories#(lf)#(lf)def save_to_csv(data, file_path):#(lf)    if data:#(lf)        # Collect all unique fieldnames from all entries#(lf)        fieldnames = set()#(lf)        for entry in data:#(lf)            fieldnames.update(entry.keys())#(lf)#(lf)        with open(file_path, mode='w', newline='', encoding='utf-8') as file:#(lf)            writer = csv.DictWriter(file, fieldnames=fieldnames, delimiter=';')#(lf)            writer.writeheader()#(lf)            writer.writerows(data)#(lf)#(lf)# Define parameters#(lf)organization = \"\"itvtmeu\"\"#(lf)project = \"\"ConnectMECore\"\"#(lf)api_version = \"\"6.0\"\"#(lf)pat = \"\"5lL9tTSit65jzLQhQActVDWJLLdY6WC1hEF3eZZABnCBzj4UMXVQJQQJ99AKACAAAAAmY8f4AAASAZDOYmLm\"\"  # Replace with actual PAT#(lf)start_date = datetime(2024, 11, 15)#(lf)end_date = datetime(2024, 11, 30)#(lf)csv_file = \"\"all_work_items_history_by_month.csv\"\"#(lf)#(lf)# Fetch work item histories#(lf)work_item_histories = fetch_work_item_histories(organization, project, api_version, pat, start_date, end_date)#(lf)#(lf)print(\"\"Got a response!\"\")#(lf)#(lf)if work_item_histories:#(lf)    df = pd.DataFrame(work_item_histories)#(lf)    df.to_csv (csv_file, index=False)#(lf)#(lf)\"),",
+          "    all_work_items_history_by_month = Quelle{[Name=\"all_work_items_history_by_month\"]}[Value],",
+          "    #\"Changed Type\" = Table.TransformColumnTypes(all_work_items_history_by_month,{{\"Work Item ID\", Int64.Type}, {\"Update ID\", Int64.Type}, {\"Updated By\", type text}, {\"Update Date\", type datetime}, {\"System.AuthorizedDate.newValue\", type datetime}, {\"System.RevisedDate.newValue\", type datetime}, {\"System.State.newValue\", type text}, {\"System.Reason.newValue\", type text}, {\"System.ChangedDate.newValue\", type datetime}, {\"Microsoft.VSTS.Common.ActivatedBy.newValue.displayName\", type text}, {\"Microsoft.VSTS.Common.ActivatedDate.newValue\", type datetime}, {\"System.History.newValue\", type text}})",
+          "in",
+          "    #\"Changed Type\""
+        ],
+        "kind": "m",
+        "lineageTag": "2b336909-443e-41e3-bec7-cb9ba5015ddc"
+      }
+    ],
+    "relationships": [
+      {
+        "name": "527ab095-3c04-4993-a6ee-526869c6cd26",
+        "fromColumn": "System.RevisedDate",
+        "fromTable": "F_DevOps_WorkItemStates",
+        "joinOnDateBehavior": "datePartOnly",
+        "toColumn": "Date",
+        "toTable": "LocalDateTable_6633ecb1-45ab-46b8-b407-4db31ff32eee"
+      },
+      {
+        "name": "AutoDetected_26065df1-7957-4cbe-bfa1-43b820284737",
+        "fromColumn": "System.State",
+        "fromTable": "F_DevOps_WorkItemStates",
+        "toColumn": "System.State",
+        "toTable": "D_StateLeadTimeSLA"
+      },
+      {
+        "name": "52f9c182-f4da-ce95-490f-e36b015b220e",
+        "crossFilteringBehavior": "bothDirections",
+        "fromColumn": "WorkItemUpdateID",
+        "fromTable": "F_DevOps_WorkItemStates",
+        "toColumn": "WorkItemUpdateID_Max",
+        "toTable": "D_DevOps_WorkItemStates_MaxUpdateID"
+      },
+      {
+        "name": "36f15f17-7c17-63d0-52bc-d2bb4305c8f8",
+        "fromColumn": "System.ChangedDate",
+        "fromTable": "F_DevOps_WorkItemStates",
+        "toColumn": "Date",
+        "toTable": "D_Date"
+      }
+    ],
+    "sourceQueryCulture": "en-US",
+    "tables": [
+      {
+        "name": "DateTableTemplate_c862db9b-9c70-4d88-97b1-efa4e3130307",
+        "annotations": [
+          {
+            "name": "__PBI_TemplateDateTable",
+            "value": "true"
+          },
+          {
+            "name": "DefaultItem",
+            "value": "DateHierarchy"
+          }
+        ],
+        "columns": [
+          {
+            "name": "Date",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "User"
+              }
+            ],
+            "dataCategory": "PaddedDateTableDates",
+            "dataType": "dateTime",
+            "isHidden": true,
+            "isNameInferred": true,
+            "lineageTag": "7c2a8fb2-0d6b-4fba-b5a9-f7d5373ad95a",
+            "sourceColumn": "[Date]",
+            "summarizeBy": "none",
+            "type": "calculatedTableColumn"
+          },
+          {
+            "name": "Jahr",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "User"
+              },
+              {
+                "name": "TemplateId",
+                "value": "Year"
+              }
+            ],
+            "dataCategory": "Years",
+            "dataType": "int64",
+            "expression": "YEAR([Date])",
+            "isHidden": true,
+            "lineageTag": "57f506ab-e7c7-439c-9d73-e5c745415ee2",
+            "summarizeBy": "none",
+            "type": "calculated"
+          },
+          {
+            "name": "MonthNo",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "User"
+              },
+              {
+                "name": "TemplateId",
+                "value": "MonthNumber"
+              }
+            ],
+            "dataCategory": "MonthOfYear",
+            "dataType": "int64",
+            "expression": "MONTH([Date])",
+            "isHidden": true,
+            "lineageTag": "fffbf2b6-3e20-48f1-8e6e-f0d4227d6552",
+            "summarizeBy": "none",
+            "type": "calculated"
+          },
+          {
+            "name": "Monat",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "User"
+              },
+              {
+                "name": "TemplateId",
+                "value": "Month"
+              }
+            ],
+            "dataCategory": "Months",
+            "dataType": "string",
+            "expression": "FORMAT([Date], \"MMMM\")",
+            "isHidden": true,
+            "lineageTag": "bef2ad58-1834-4821-9a87-ceed978c8122",
+            "sortByColumn": "MonthNo",
+            "summarizeBy": "none",
+            "type": "calculated"
+          },
+          {
+            "name": "QuarterNo",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "User"
+              },
+              {
+                "name": "TemplateId",
+                "value": "QuarterNumber"
+              }
+            ],
+            "dataCategory": "QuarterOfYear",
+            "dataType": "int64",
+            "expression": "INT(([MonthNo] + 2) / 3)",
+            "isHidden": true,
+            "lineageTag": "05e351cd-1743-47f5-a3ad-d05e91e6ed71",
+            "summarizeBy": "none",
+            "type": "calculated"
+          },
+          {
+            "name": "Quartal",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "User"
+              },
+              {
+                "name": "TemplateId",
+                "value": "Quarter"
+              }
+            ],
+            "dataCategory": "Quarters",
+            "dataType": "string",
+            "expression": "\"Qrtl \" & [QuarterNo]",
+            "isHidden": true,
+            "lineageTag": "bc9752a2-9f58-4968-b1f5-1e91dcb132f3",
+            "sortByColumn": "QuarterNo",
+            "summarizeBy": "none",
+            "type": "calculated"
+          },
+          {
+            "name": "Tag",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "User"
+              },
+              {
+                "name": "TemplateId",
+                "value": "Day"
+              }
+            ],
+            "dataCategory": "DayOfMonth",
+            "dataType": "int64",
+            "expression": "DAY([Date])",
+            "isHidden": true,
+            "lineageTag": "eb92a9c6-456a-414c-a5c3-17afce2cf62f",
+            "summarizeBy": "none",
+            "type": "calculated"
+          }
+        ],
+        "hierarchies": [
+          {
+            "name": "Datumshierarchie",
+            "annotations": [
+              {
+                "name": "TemplateId",
+                "value": "DateHierarchy"
+              }
+            ],
+            "levels": [
+              {
+                "name": "Jahr",
+                "column": "Jahr",
+                "lineageTag": "36956434-7c74-46c0-86a0-328da57ea639",
+                "ordinal": 0
+              },
+              {
+                "name": "Quartal",
+                "column": "Quartal",
+                "lineageTag": "e7bc3c77-d583-4c17-a659-c50bf47a7435",
+                "ordinal": 1
+              },
+              {
+                "name": "Monat",
+                "column": "Monat",
+                "lineageTag": "d32b9baf-1dc6-46fc-99ca-be7cc3c21529",
+                "ordinal": 2
+              },
+              {
+                "name": "Tag",
+                "column": "Tag",
+                "lineageTag": "c33f5f70-1b99-40d6-953b-36a8abffc749",
+                "ordinal": 3
+              }
+            ],
+            "lineageTag": "24146f55-c456-4b40-b64a-d2e3566bfc9c"
+          }
+        ],
+        "isHidden": true,
+        "isPrivate": true,
+        "lineageTag": "93f7bde0-157b-4333-8a0e-fdc6641e7fcf",
+        "partitions": [
+          {
+            "name": "DateTableTemplate_c862db9b-9c70-4d88-97b1-efa4e3130307",
+            "mode": "import",
+            "source": {
+              "expression": "Calendar(Date(2015,1,1), Date(2015,1,1))",
+              "type": "calculated"
+            }
+          }
+        ]
+      },
+      {
+        "name": "D_Date",
+        "annotations": [
+          {
+            "name": "PBI_Id",
+            "value": "b970fd66ec4a4dda9bc276dd0b8ea020"
+          }
+        ],
+        "columns": [
+          {
+            "name": "Date",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "Automatic"
+              },
+              {
+                "name": "PBI_FormatHint",
+                "value": "{\"isDateTimeCustom\":true}"
+              }
+            ],
+            "dataType": "dateTime",
+            "formatString": "dd/mm/yyyy",
+            "isDataTypeInferred": true,
+            "isKey": true,
+            "isNameInferred": true,
+            "lineageTag": "c2c380e5-ca69-496c-ad03-94892d4d944b",
+            "sourceColumn": "[Date]",
+            "summarizeBy": "none",
+            "type": "calculatedTableColumn"
+          },
+          {
+            "name": "Year",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "User"
+              }
+            ],
+            "dataType": "int64",
+            "formatString": "0",
+            "isDataTypeInferred": true,
+            "isNameInferred": true,
+            "lineageTag": "931ff390-3593-42be-bb3d-d96f4ea2ec8a",
+            "sourceColumn": "[Year]",
+            "summarizeBy": "none",
+            "type": "calculatedTableColumn"
+          },
+          {
+            "name": "Quarter",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "Automatic"
+              }
+            ],
+            "dataType": "string",
+            "isDataTypeInferred": true,
+            "isNameInferred": true,
+            "lineageTag": "5bd4f5fa-295a-4fe7-abf4-90a229f7dd29",
+            "sourceColumn": "[Quarter]",
+            "summarizeBy": "none",
+            "type": "calculatedTableColumn"
+          },
+          {
+            "name": "Year Quarter",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "Automatic"
+              }
+            ],
+            "dataType": "string",
+            "isDataTypeInferred": true,
+            "isNameInferred": true,
+            "lineageTag": "0bff2951-1857-480f-b225-e0f77b692e84",
+            "sourceColumn": "[Year Quarter]",
+            "summarizeBy": "none",
+            "type": "calculatedTableColumn"
+          },
+          {
+            "name": "Year Month",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "Automatic"
+              }
+            ],
+            "dataType": "string",
+            "isDataTypeInferred": true,
+            "isNameInferred": true,
+            "lineageTag": "b2dd7a4d-40bd-42f2-b275-2265ebe9b923",
+            "sortByColumn": "Year MonthNr",
+            "sourceColumn": "[Year Month]",
+            "summarizeBy": "none",
+            "type": "calculatedTableColumn"
+          },
+          {
+            "name": "Month",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "User"
+              }
+            ],
+            "dataType": "string",
+            "isDataTypeInferred": true,
+            "isNameInferred": true,
+            "lineageTag": "ae9cd742-67fc-40a4-b644-c59e15c9a8c9",
+            "sourceColumn": "[Month]",
+            "summarizeBy": "none",
+            "type": "calculatedTableColumn"
+          },
+          {
+            "name": "Day",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "User"
+              }
+            ],
+            "dataType": "int64",
+            "formatString": "0",
+            "isDataTypeInferred": true,
+            "isNameInferred": true,
+            "lineageTag": "5b1810cd-ff05-417d-ab67-5b728290c63e",
+            "sourceColumn": "[Day]",
+            "summarizeBy": "none",
+            "type": "calculatedTableColumn"
+          },
+          {
+            "name": "Week of Year",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "User"
+              }
+            ],
+            "dataType": "int64",
+            "formatString": "0",
+            "isDataTypeInferred": true,
+            "isNameInferred": true,
+            "lineageTag": "e7af7156-1a95-45ef-96e7-836cf67e5b5b",
+            "sourceColumn": "[Week of Year]",
+            "summarizeBy": "none",
+            "type": "calculatedTableColumn"
+          },
+          {
+            "name": "Fiscal Year",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "Automatic"
+              }
+            ],
+            "dataType": "string",
+            "isDataTypeInferred": true,
+            "isNameInferred": true,
+            "lineageTag": "5917b540-75e8-468d-9dd2-eb13290b9819",
+            "sourceColumn": "[Fiscal Year]",
+            "summarizeBy": "none",
+            "type": "calculatedTableColumn"
+          },
+          {
+            "name": "FY",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "Automatic"
+              }
+            ],
+            "dataType": "string",
+            "isDataTypeInferred": true,
+            "isNameInferred": true,
+            "lineageTag": "a1af8627-0e32-4271-a124-661f9672317c",
+            "sourceColumn": "[FY]",
+            "summarizeBy": "none",
+            "type": "calculatedTableColumn"
+          },
+          {
+            "name": "FY Q",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "Automatic"
+              }
+            ],
+            "dataType": "string",
+            "isDataTypeInferred": true,
+            "isNameInferred": true,
+            "lineageTag": "ace81142-5077-4b5c-8d10-8056d6b44844",
+            "sourceColumn": "[FY Q]",
+            "summarizeBy": "none",
+            "type": "calculatedTableColumn"
+          },
+          {
+            "name": "FY Quarter",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "Automatic"
+              }
+            ],
+            "dataType": "string",
+            "isDataTypeInferred": true,
+            "isNameInferred": true,
+            "lineageTag": "7a0aa76b-0c87-4a18-844a-4acd62e04894",
+            "sourceColumn": "[FY Quarter]",
+            "summarizeBy": "none",
+            "type": "calculatedTableColumn"
+          },
+          {
+            "name": "Year Month_DE",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "Automatic"
+              }
+            ],
+            "dataType": "string",
+            "isDataTypeInferred": true,
+            "isHidden": true,
+            "isNameInferred": true,
+            "lineageTag": "d3a695f6-765e-45d1-b51e-17836a8d9bc1",
+            "sortByColumn": "Year MonthNr",
+            "sourceColumn": "[Year Month_DE]",
+            "summarizeBy": "none",
+            "type": "calculatedTableColumn"
+          },
+          {
+            "name": "Weekday Name_DE",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "Automatic"
+              }
+            ],
+            "dataType": "string",
+            "isDataTypeInferred": true,
+            "isHidden": true,
+            "isNameInferred": true,
+            "lineageTag": "d9a60140-5796-480d-8c6f-85de51bbb252",
+            "sortByColumn": "Weekday_DE",
+            "sourceColumn": "[Weekday Name_DE]",
+            "summarizeBy": "none",
+            "type": "calculatedTableColumn"
+          },
+          {
+            "name": "Month Name_DE",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "Automatic"
+              }
+            ],
+            "dataType": "string",
+            "isDataTypeInferred": true,
+            "isHidden": true,
+            "isNameInferred": true,
+            "lineageTag": "09f30f9f-1d1b-4ec8-aa25-36bdfe959574",
+            "sortByColumn": "Month",
+            "sourceColumn": "[Month Name_DE]",
+            "summarizeBy": "none",
+            "type": "calculatedTableColumn"
+          },
+          {
+            "name": "Year MonthNr",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "Automatic"
+              }
+            ],
+            "dataType": "string",
+            "isDataTypeInferred": true,
+            "isHidden": true,
+            "isNameInferred": true,
+            "lineageTag": "d827991c-8dd8-42fe-a474-1f8aa922b31b",
+            "sourceColumn": "[Year MonthNr]",
+            "summarizeBy": "none",
+            "type": "calculatedTableColumn"
+          },
+          {
+            "name": "Month Name",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "Automatic"
+              }
+            ],
+            "dataType": "string",
+            "isDataTypeInferred": true,
+            "isNameInferred": true,
+            "lineageTag": "b83557c7-7bf8-4246-bdb1-2ecf3a6ec6eb",
+            "sortByColumn": "Month",
+            "sourceColumn": "[Month Name]",
+            "summarizeBy": "none",
+            "type": "calculatedTableColumn"
+          },
+          {
+            "name": "Weekday Name",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "Automatic"
+              }
+            ],
+            "dataType": "string",
+            "isDataTypeInferred": true,
+            "isNameInferred": true,
+            "lineageTag": "c74775f4-2932-455d-961d-80a84d9004e2",
+            "sortByColumn": "Weekday_DE",
+            "sourceColumn": "[Weekday Name]",
+            "summarizeBy": "none",
+            "type": "calculatedTableColumn"
+          },
+          {
+            "name": "Weekday_DE",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "Automatic"
+              }
+            ],
+            "dataType": "int64",
+            "formatString": "0",
+            "isDataTypeInferred": true,
+            "isNameInferred": true,
+            "lineageTag": "eb97ec36-70f5-42e6-bf0d-9ca4c9707fee",
+            "sourceColumn": "[Weekday_DE]",
+            "summarizeBy": "none",
+            "type": "calculatedTableColumn"
+          }
+        ],
+        "dataCategory": "Time",
+        "lineageTag": "52ef710f-9846-4643-8e34-8367733b7778",
+        "partitions": [
+          {
+            "name": "D_Date",
+            "mode": "import",
+            "source": {
+              "expression": [
+                "ADDCOLUMNS(",
+                "    CALENDARAUTO(),",
+                "    \"Year\", YEAR([Date]),",
+                "    \"Quarter\", \"Q\" & QUARTER([Date]),",
+                "    \"Year Quarter\", YEAR([Date]) &  \" Q\" & QUARTER([Date]),",
+                "    \"Year MonthNr\", FORMAT([Date], \"YYYYMM\", \"en-US\"),",
+                "    \"Year Month\", FORMAT([Date], \"YYYY MMMM\", \"en-US\"),",
+                "    \"Year Month_DE\", FORMAT([Date], \"YYYY MMMM\", \"de-DE\"),",
+                "    \"Month\", FORMAT([Date], \"MM\", \"en-US\"),",
+                "    \"Month Name\", FORMAT([Date],\"MMMM\", \"en-US\"),",
+                "    \"Month Name_DE\", FORMAT([Date],\"MMMM\", \"de-DE\"),",
+                "    \"Day\", DAY([Date]),    ",
+                "    \"Week of Year\", WEEKNUM([Date],2),",
+                "    \"Weekday_DE\", WEEKDAY([Date],2),",
+                "    \"Weekday Name\", FORMAT([Date],\"dddd\", \"en-US\"),",
+                "    \"Weekday Name_DE\", FORMAT([Date],\"dddd\", \"de-DE\"),",
+                "    \"Fiscal Year\", YEAR([Date]) - 1 + (MONTH([Date]) >= 4) & \"-\" & YEAR([Date]) + (MONTH([Date]) >= 4),",
+                "    \"FY\", \"FY\" & YEAR([Date]) - 1 + (MONTH([Date]) >= 4),",
+                "    \"FY Q\", \"FY Q\" & FORMAT(INT((MOD(MONTH([Date]) - 4 + 12, 12) / 3) + 1), \"0\"),",
+                "    \"FY Quarter\", \"FY\" & YEAR([Date]) - 1 + (MONTH([Date]) >= 4) & \" Q\" & FORMAT(INT((MOD(MONTH([Date]) - 4 + 12, 12) / 3) + 1), \"0\")",
+                ")"
+              ],
+              "type": "calculated"
+            }
+          }
+        ]
+      },
+      {
+        "name": "F_DevOps_WorkItemStates",
+        "annotations": [
+          {
+            "name": "PBI_NavigationStepName",
+            "value": "Navigation"
+          },
+          {
+            "name": "PBI_ResultType",
+            "value": "Table"
+          }
+        ],
+        "columns": [
+          {
+            "name": "WorkItem ID",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "User"
+              }
+            ],
+            "changedProperties": [
+              {
+                "property": "SortByColumn"
+              }
+            ],
+            "dataType": "int64",
+            "formatString": "0",
+            "lineageTag": "d588d4a3-dcf1-459b-9524-806d71c837d7",
+            "sourceColumn": "WorkItem ID",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "Update ID",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "User"
+              }
+            ],
+            "changedProperties": [
+              {
+                "property": "SortByColumn"
+              }
+            ],
+            "dataType": "int64",
+            "formatString": "0",
+            "lineageTag": "d33f93d4-de8d-4242-a3a6-c5d4877dbb9b",
+            "sourceColumn": "Update ID",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "Updated By",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "Automatic"
+              }
+            ],
+            "dataType": "string",
+            "lineageTag": "f8838b57-e8f5-401a-bc67-56b698096b28",
+            "sourceColumn": "Updated By",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "System.ChangedDate",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "Automatic"
+              },
+              {
+                "name": "UnderlyingDateTimeDataType",
+                "value": "Date"
+              },
+              {
+                "name": "PBI_FormatHint",
+                "value": "{\"isDateTimeCustom\":true}"
+              }
+            ],
+            "changedProperties": [
+              {
+                "property": "IsHidden"
+              }
+            ],
+            "dataType": "dateTime",
+            "formatString": "dd/mm/yyyy",
+            "isHidden": true,
+            "lineageTag": "cd1a8f4c-0c20-478f-9c9e-f1a75ba851cc",
+            "sourceColumn": "System.ChangedDate",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "System.RevisedDate",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "Automatic"
+              },
+              {
+                "name": "UnderlyingDateTimeDataType",
+                "value": "Date"
+              },
+              {
+                "name": "PBI_FormatHint",
+                "value": "{\"isDateTimeCustom\":true}"
+              }
+            ],
+            "changedProperties": [
+              {
+                "property": "IsHidden"
+              }
+            ],
+            "dataType": "dateTime",
+            "formatString": "dd.mm.yyyy",
+            "isHidden": true,
+            "lineageTag": "b8d36af1-7b95-4426-8b59-f0561b84e728",
+            "sourceColumn": "System.RevisedDate",
+            "summarizeBy": "none",
+            "variations": [
+              {
+                "name": "Variation",
+                "defaultHierarchy": {
+                  "hierarchy": "Datumshierarchie",
+                  "table": "LocalDateTable_6633ecb1-45ab-46b8-b407-4db31ff32eee"
+                },
+                "isDefault": true,
+                "relationship": "527ab095-3c04-4993-a6ee-526869c6cd26"
+              }
+            ]
+          },
+          {
+            "name": "System.State",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "Automatic"
+              }
+            ],
+            "dataType": "string",
+            "lineageTag": "a36c2952-74ea-4753-8122-3d37c9015b04",
+            "sourceColumn": "System.State",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "System.Reason",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "Automatic"
+              }
+            ],
+            "dataType": "string",
+            "lineageTag": "8eea8379-d4aa-48e8-881c-b89b0416cf90",
+            "sourceColumn": "System.Reason",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "LeadTimeDays",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "User"
+              }
+            ],
+            "dataType": "int64",
+            "formatString": "0",
+            "lineageTag": "d9232c34-1b94-4bb8-8767-9fef23340b7c",
+            "sourceColumn": "LeadTimeDays",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "WorkItemUpdateID",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "Automatic"
+              }
+            ],
+            "dataType": "string",
+            "expression": [
+              "",
+              "'F_DevOps_WorkItemStates'[WorkItem ID] & \"-\" & FORMAT('F_DevOps_WorkItemStates'[Update ID], \"00\")"
+            ],
+            "isDataTypeInferred": true,
+            "lineageTag": "2375a4bc-2e55-46b0-b1ee-6fa8091074e3",
+            "summarizeBy": "none",
+            "type": "calculated"
+          }
+        ],
+        "lineageTag": "d4315f3d-a9a9-4c29-a52a-c91f5b5743a3",
+        "partitions": [
+          {
+            "name": "F_DevOps_WorkItemStates",
+            "mode": "import",
+            "source": {
+              "expression": [
+                "let",
+                "    Quelle = Python.Execute(",
+                "        \"import base64#(lf)import json#(lf)import requests#(lf)import csv#(lf)import os, matplotlib#(lf)import pandas as pd#(lf)from datetime import datetime, timedelta#(lf)#(lf)def flatten_json(change_data):#(lf)    \"\"\"\"\"\"Flatten the JSON structure into a flat dictionary.\"\"\"\"\"\"#(lf)    if not isinstance(change_data, dict):#(lf)        raise ValueError(\"\"Input must be a dictionary.\"\")#(lf)#(lf)    flat_data = {}#(lf)#(lf)    def flatten_helper(data, parent_key=''):#(lf)        \"\"\"\"\"\"Recursive helper function to flatten the JSON.\"\"\"\"\"\"#(lf)        if isinstance(data, dict):#(lf)            for key, value in data.items():#(lf)                new_key = f\"\"{parent_key}.{key}\"\" if parent_key else key#(lf)                flatten_helper(value, new_key)#(lf)        elif isinstance(data, list):#(lf)            for index, item in enumerate(data):#(lf)                new_key = f\"\"{parent_key}.{index}\"\" if parent_key else str(index)#(lf)                flatten_helper(item, new_key)#(lf)        else:#(lf)            flat_data[parent_key] = data#(lf)#(lf)    flatten_helper(change_data)#(lf)    return flat_data#(lf)#(lf)def extract_data_to_csv(change_data):#(lf)    \"\"\"\"\"\"Convert given JSON data to a flat dictionary format for CSV.\"\"\"\"\"\"#(lf)    flat_data = flatten_json(change_data)#(lf)    return flat_data#(lf)#(lf)def fetch_work_item_histories(organization, project, api_version, pat, start_date, end_date):#(lf)    token = f':{pat}'#(lf)    encoded_token = base64.b64encode(token.encode()).decode()#(lf)    headers = {#(lf)        \"\"Authorization\"\": f\"\"Basic {encoded_token}\"\",#(lf)        \"\"Content-Type\"\": \"\"application/json\"\"#(lf)    }#(lf)#(lf)    all_work_item_histories = []#(lf)    current_start_date = start_date#(lf)#(lf)    # Define allowed fields for CSV#(lf)    allowed_fields = set([#(lf)        \"\"Work Item ID\"\",#(lf)        \"\"Update ID\"\",#(lf)        \"\"Updated By\"\",#(lf)        \"\"Update Date\"\",#(lf)        \"\"System.Title\"\",#(lf)        \"\"System.Description\"\",#(lf)        \"\"System.State.newValue\"\",#(lf)        \"\"System.Reason.newValue\"\",#(lf)        \"\"System.AssignedTo\"\",#(lf)        \"\"System.AuthorizedDate.newValue\"\",#(lf)        \"\"System.RevisedDate.newValue\"\",#(lf)        \"\"System.ChangedDate.newValue\"\",        #(lf)        \"\"System.History.newValue\"\",#(lf)        \"\"Microsoft.VSTS.Common.ActivatedDate.newValue\"\",#(lf)        \"\"Microsoft.VSTS.Common.ActivatedBy.newValue.displayName\"\",#(lf)        # Add other relevant fields as needed#(lf)    ])#(lf)#(lf)    while current_start_date < end_date:#(lf)        current_end_date = (current_start_date.replace(day=1) + timedelta(days=32)).replace(day=1) - timedelta(seconds=1)#(lf)#(lf)        wiql_query = {#(lf)            \"\"query\"\": (#(lf)                \"\"SELECT [System.Id], [System.WorkItemType], [System.Title], \"\"#(lf)                \"\"[System.AssignedTo], [System.State] FROM WorkItems \"\"#(lf)                f\"\"WHERE [System.TeamProject] = '{project}' \"\"#(lf)                f\"\"AND [System.CreatedDate] >= '{current_start_date.strftime('%Y-%m-%d')}' \"\"#(lf)                f\"\"AND [System.CreatedDate] <= '{current_end_date.strftime('%Y-%m-%d')}' \"\"#(lf)                \"\"ORDER BY [System.Id]\"\"#(lf)            )#(lf)        }#(lf)#(lf)        wiql_url = f\"\"https://dev.azure.com/{organization}/{project}/_apis/wit/wiql?api-version={api_version}\"\"#(lf)        response = requests.post(wiql_url, headers=headers, json=wiql_query)#(lf)#(lf)        if response.ok:#(lf)            try:#(lf)                data = response.json()#(lf)            except json.JSONDecodeError as e:#(lf)                print(f\"\"JSONDecodeError when parsing response: {e}\"\")#(lf)                continue#(lf)#(lf)            if not data.get('workItems'):#(lf)                print(f\"\"No work items found for the period {current_start_date.strftime('%Y-%m-%d')} to {current_end_date.strftime('%Y-%m-%d')}.\"\")#(lf)            else:#(lf)                for work_item in data['workItems']:#(lf)                    work_item_id = work_item['id']#(lf)                    history_url = f\"\"https://dev.azure.com/{organization}/{project}/_apis/wit/workitems/{work_item_id}/updates?api-version={api_version}\"\"#(lf)                    history_response = requests.get(history_url, headers=headers)#(lf)#(lf)                    if history_response.ok:#(lf)                        try:#(lf)                            history_data = history_response.json()#(lf)                        except json.JSONDecodeError as e:#(lf)                            print(f\"\"JSONDecodeError for work item {work_item_id}: {e}\"\")#(lf)                            continue#(lf)#(lf)                        for item in history_data.get('value', []):#(lf)                            history_entry = {#(lf)                                \"\"Work Item ID\"\": work_item_id,#(lf)                                \"\"Update ID\"\": item['id'],#(lf)                                \"\"Updated By\"\": item['revisedBy']['displayName'],#(lf)                                \"\"Update Date\"\": item['revisedDate']                                #(lf)                            }#(lf)#(lf)                            # Extract and flatten change data#(lf)                            change_data = item.get('fields', {})#(lf)                            data_as_csv = extract_data_to_csv(change_data)#(lf)#(lf)                            # Combine history entry with change data, filtering by allowed fields#(lf)                            combined_entry = {key: value for key, value in {**history_entry, **data_as_csv}.items() if key in allowed_fields}#(lf)                            all_work_item_histories.append(combined_entry)  # Append combined entry to the list                            #(lf)#(lf)                        print(f\"\"History for work item {work_item_id} successfully retrieved.\"\")#(lf)        #(lf)        else:#(lf)            print(f\"\"Failed to retrieve work items: {response.status_code} - {response.text}\"\")#(lf)#(lf)        current_start_date = current_end_date + timedelta(seconds=1)#(lf)#(lf)    return all_work_item_histories#(lf)#(lf)def save_to_csv(data, file_path):#(lf)    if data:#(lf)        # Collect all unique fieldnames from all entries#(lf)        fieldnames = set()#(lf)        for entry in data:#(lf)            fieldnames.update(entry.keys())#(lf)#(lf)        with open(file_path, mode='w', newline='', encoding='utf-8') as file:#(lf)            writer = csv.DictWriter(file, fieldnames=fieldnames, delimiter=';')#(lf)            writer.writeheader()#(lf)            writer.writerows(data)#(lf)#(lf)# Define parameters#(lf)organization = \"\"itvtmeu\"\"#(lf)project = \"\"ConnectMECore\"\"#(lf)api_version = \"\"6.0\"\"#(lf)pat = \"\"5lL9tTSit65jzLQhQActVDWJLLdY6WC1hEF3eZZABnCBzj4UMXVQJQQJ99AKACAAAAAmY8f4AAASAZDOYmLm\"\"  # Replace with actual PAT#(lf)start_date = datetime(2024, 9, 1)#(lf)end_date = datetime(2024, 12, 31)#(lf)csv_file = \"\"all_work_items_history_by_month.csv\"\"#(lf)#(lf)# Fetch work item histories#(lf)work_item_histories = fetch_work_item_histories(organization, project, api_version, pat, start_date, end_date)#(lf)#(lf)print(\"\"Got a response!\"\")#(lf)#(lf)if work_item_histories:#(lf)    df = pd.DataFrame(work_item_histories)#(lf)    df.to_csv (csv_file, index=False)#(lf)#(lf)\"",
+                "    ),",
+                "    df1 = Quelle{[Name = \"df\"]}[Value],",
+                "    #\"Filtered Rows\" = Table.SelectRows(df1, each ([System.State.newValue] <> \"\")),",
+                "    #\"Removed Columns\" = Table.RemoveColumns(",
+                "        #\"Filtered Rows\",",
+                "        {",
+                "            \"Update Date\",",
+                "            \"System.AuthorizedDate.newValue\",",
+                "            \"Microsoft.VSTS.Common.ActivatedBy.newValue.displayName\",",
+                "            \"Microsoft.VSTS.Common.ActivatedDate.newValue\",",
+                "            \"System.History.newValue\"",
+                "        }",
+                "    ),",
+                "    #\"Reordered Columns\" = Table.ReorderColumns(",
+                "        #\"Removed Columns\",",
+                "        {",
+                "            \"Work Item ID\",",
+                "            \"Update ID\",",
+                "            \"Updated By\",",
+                "            \"System.ChangedDate.newValue\",",
+                "            \"System.RevisedDate.newValue\",",
+                "            \"System.State.newValue\",",
+                "            \"System.Reason.newValue\"",
+                "        }",
+                "    ),",
+                "    #\"Renamed Columns\" = Table.RenameColumns(",
+                "        #\"Reordered Columns\",",
+                "        {",
+                "            {\"Work Item ID\", \"WorkItem ID\"},",
+                "            {\"System.ChangedDate.newValue\", \"System.ChangedDate\"},",
+                "            {\"System.RevisedDate.newValue\", \"System.RevisedDate\"},",
+                "            {\"System.State.newValue\", \"System.State\"},",
+                "            {\"System.Reason.newValue\", \"System.Reason\"}",
+                "        }",
+                "    ),",
+                "    #\"Changed Type\" = Table.TransformColumnTypes(",
+                "        #\"Renamed Columns\",",
+                "        {",
+                "            {\"WorkItem ID\", Int64.Type},",
+                "            {\"Update ID\", Int64.Type},",
+                "            {\"Updated By\", type text},",
+                "            {\"System.ChangedDate\", type datetime},",
+                "            {\"System.RevisedDate\", type datetime},",
+                "            {\"System.State\", type text},",
+                "            {\"System.Reason\", type text}",
+                "        }",
+                "    ),",
+                "    #\"Changed Type1\" = Table.TransformColumnTypes(",
+                "        #\"Changed Type\", {{\"System.ChangedDate\", type date}, {\"System.RevisedDate\", type date}}",
+                "    ),",
+                "    #\"RevisedDate to Text\" = Table.TransformColumnTypes(#\"Changed Type1\", {{\"System.RevisedDate\", type text}}),",
+                "    #\"Replaced Value\" = Table.ReplaceValue(",
+                "        #\"RevisedDate to Text\",",
+                "        \"1/1/9999\",",
+                "        DateTime.ToText(DateTime.LocalNow(), \"MM/dd/yyyy\"),",
+                "        Replacer.ReplaceText,",
+                "        {\"System.RevisedDate\"}",
+                "    ),",
+                "    #\"RevisedDate to Date\" = Table.TransformColumnTypes(#\"Replaced Value\", {{\"System.RevisedDate\", type date}}),",
+                "    #\"Inserted Date Subtraction\" = Table.AddColumn(",
+                "        #\"RevisedDate to Date\", \"LeadTimeDays\", each Duration.Days([System.RevisedDate] - [System.ChangedDate])",
+                "    ),",
+                "    #\"Reordered Columns1\" = Table.ReorderColumns(#\"Inserted Date Subtraction\",{\"WorkItem ID\", \"Update ID\", \"Updated By\", \"System.ChangedDate\", \"System.RevisedDate\", \"LeadTimeDays\", \"System.State\", \"System.Reason\"}),",
+                "    #\"Sorted Rows\" = Table.Sort(#\"Reordered Columns1\",{{\"WorkItem ID\", Order.Ascending}, {\"Update ID\", Order.Ascending}}),",
+                "    #\"Changed Type2\" = Table.TransformColumnTypes(#\"Sorted Rows\",{{\"LeadTimeDays\", Int64.Type}})",
+                "in",
+                "    #\"Changed Type2\""
+              ],
+              "type": "m"
+            }
+          }
+        ]
+      },
+      {
+        "name": "LocalDateTable_6633ecb1-45ab-46b8-b407-4db31ff32eee",
+        "annotations": [
+          {
+            "name": "__PBI_LocalDateTable",
+            "value": "true"
+          }
+        ],
+        "columns": [
+          {
+            "name": "Date",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "User"
+              }
+            ],
+            "dataCategory": "PaddedDateTableDates",
+            "dataType": "dateTime",
+            "isHidden": true,
+            "isNameInferred": true,
+            "lineageTag": "3f5ed04b-bdb0-42fa-8b40-ef1df8da426c",
+            "sourceColumn": "[Date]",
+            "summarizeBy": "none",
+            "type": "calculatedTableColumn"
+          },
+          {
+            "name": "Jahr",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "User"
+              },
+              {
+                "name": "TemplateId",
+                "value": "Year"
+              }
+            ],
+            "dataCategory": "Years",
+            "dataType": "int64",
+            "expression": "YEAR([Date])",
+            "isHidden": true,
+            "lineageTag": "bd3bd318-d534-4067-8646-12b77c1ea07d",
+            "summarizeBy": "none",
+            "type": "calculated"
+          },
+          {
+            "name": "MonthNo",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "User"
+              },
+              {
+                "name": "TemplateId",
+                "value": "MonthNumber"
+              }
+            ],
+            "dataCategory": "MonthOfYear",
+            "dataType": "int64",
+            "expression": "MONTH([Date])",
+            "isHidden": true,
+            "lineageTag": "4c88c0d7-9b97-4557-8c43-3f073588542e",
+            "summarizeBy": "none",
+            "type": "calculated"
+          },
+          {
+            "name": "Monat",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "User"
+              },
+              {
+                "name": "TemplateId",
+                "value": "Month"
+              }
+            ],
+            "dataCategory": "Months",
+            "dataType": "string",
+            "expression": "FORMAT([Date], \"MMMM\")",
+            "isHidden": true,
+            "lineageTag": "7a963608-8537-453f-a6e9-aebcff3c6b73",
+            "sortByColumn": "MonthNo",
+            "summarizeBy": "none",
+            "type": "calculated"
+          },
+          {
+            "name": "QuarterNo",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "User"
+              },
+              {
+                "name": "TemplateId",
+                "value": "QuarterNumber"
+              }
+            ],
+            "dataCategory": "QuarterOfYear",
+            "dataType": "int64",
+            "expression": "INT(([MonthNo] + 2) / 3)",
+            "isHidden": true,
+            "lineageTag": "4e8dc8d0-a571-4b99-a729-eeec97dc591d",
+            "summarizeBy": "none",
+            "type": "calculated"
+          },
+          {
+            "name": "Quartal",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "User"
+              },
+              {
+                "name": "TemplateId",
+                "value": "Quarter"
+              }
+            ],
+            "dataCategory": "Quarters",
+            "dataType": "string",
+            "expression": "\"Qrtl \" & [QuarterNo]",
+            "isHidden": true,
+            "lineageTag": "b4c4094f-9d2c-4841-b712-bb62782d9349",
+            "sortByColumn": "QuarterNo",
+            "summarizeBy": "none",
+            "type": "calculated"
+          },
+          {
+            "name": "Tag",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "User"
+              },
+              {
+                "name": "TemplateId",
+                "value": "Day"
+              }
+            ],
+            "dataCategory": "DayOfMonth",
+            "dataType": "int64",
+            "expression": "DAY([Date])",
+            "isHidden": true,
+            "lineageTag": "9898200f-8d46-46a5-8174-95afc6077068",
+            "summarizeBy": "none",
+            "type": "calculated"
+          }
+        ],
+        "hierarchies": [
+          {
+            "name": "Datumshierarchie",
+            "annotations": [
+              {
+                "name": "TemplateId",
+                "value": "DateHierarchy"
+              }
+            ],
+            "levels": [
+              {
+                "name": "Jahr",
+                "column": "Jahr",
+                "lineageTag": "a8bb4455-6cef-43ae-bb54-723d504eb904",
+                "ordinal": 0
+              },
+              {
+                "name": "Quartal",
+                "column": "Quartal",
+                "lineageTag": "9639fd3c-148d-45a5-8377-e1f0585e72aa",
+                "ordinal": 1
+              },
+              {
+                "name": "Monat",
+                "column": "Monat",
+                "lineageTag": "bd62eb9d-466f-460d-97f5-67108513241a",
+                "ordinal": 2
+              },
+              {
+                "name": "Tag",
+                "column": "Tag",
+                "lineageTag": "a687dedf-b4bf-4c88-87ba-67b502a2b018",
+                "ordinal": 3
+              }
+            ],
+            "lineageTag": "2432425a-515f-4a0f-a604-7395052528c9"
+          }
+        ],
+        "isHidden": true,
+        "lineageTag": "222491f4-b7f0-4747-ab4a-a46c91055c35",
+        "partitions": [
+          {
+            "name": "LocalDateTable_6633ecb1-45ab-46b8-b407-4db31ff32eee",
+            "mode": "import",
+            "source": {
+              "expression": "Calendar(Date(Year(MIN('F_DevOps_WorkItemStates'[System.RevisedDate])), 1, 1), Date(Year(MAX('F_DevOps_WorkItemStates'[System.RevisedDate])), 12, 31))",
+              "type": "calculated"
+            }
+          }
+        ],
+        "showAsVariationsOnly": true
+      },
+      {
+        "name": "M_DevOps_WorkItems",
+        "annotations": [
+          {
+            "name": "PBI_NavigationStepName",
+            "value": "Navigation"
+          },
+          {
+            "name": "PBI_ResultType",
+            "value": "Table"
+          }
+        ],
+        "changedProperties": [
+          {
+            "property": "IsHidden"
+          }
+        ],
+        "lineageTag": "3654bd7b-eda0-4194-b08e-21b9cfe9d1e7",
+        "measures": [
+          {
+            "name": "LT.DateDiff",
+            "changedProperties": [
+              {
+                "property": "IsHidden"
+              }
+            ],
+            "displayFolder": "LeadTimes",
+            "expression": [
+              "",
+              "DATEDIFF(",
+              "    SELECTEDVALUE('F_DevOps_WorkItemStates'[System.ChangedDate]),",
+              "    SELECTEDVALUE('F_DevOps_WorkItemStates'[System.RevisedDate]),",
+              "    DAY",
+              ")"
+            ],
+            "formatString": "0",
+            "lineageTag": "5faded88-9e75-4384-999a-7d0fd34bdc64"
+          },
+          {
+            "name": "LT.Sumx",
+            "changedProperties": [
+              {
+                "property": "IsHidden"
+              }
+            ],
+            "displayFolder": "LeadTimes",
+            "expression": [
+              "",
+              "SUMX(",
+              "    'F_DevOps_WorkItemStates',",
+              "    [LT.DateDiff]",
+              ")"
+            ],
+            "formatString": "0",
+            "lineageTag": "4e65de78-0519-44dc-b58d-9cf87de1f07c"
+          },
+          {
+            "name": "#WorkItemsID",
+            "changedProperties": [
+              {
+                "property": "IsHidden"
+              }
+            ],
+            "displayFolder": "Counts",
+            "expression": "DISTINCTCOUNT(F_DevOps_WorkItemStates[WorkItem ID])",
+            "formatString": "0",
+            "lineageTag": "fe2e8a7c-a1ba-4d0d-903f-6dcb385f3a81"
+          },
+          {
+            "name": "#System.State",
+            "changedProperties": [
+              {
+                "property": "IsHidden"
+              }
+            ],
+            "displayFolder": "Counts",
+            "expression": "DISTINCTCOUNT(F_DevOps_WorkItemStates[System.State])",
+            "formatString": "0",
+            "lineageTag": "f41b960f-0120-4d3e-b8af-f94c3e726e01"
+          },
+          {
+            "name": "#System.Reason",
+            "changedProperties": [
+              {
+                "property": "IsHidden"
+              }
+            ],
+            "displayFolder": "Counts",
+            "expression": "DISTINCTCOUNT(F_DevOps_WorkItemStates[System.Reason])",
+            "formatString": "0",
+            "lineageTag": "84eda95a-275c-42ba-ace8-89679759d1b1"
+          },
+          {
+            "name": "LT.SumxSLA",
+            "changedProperties": [
+              {
+                "property": "IsHidden"
+              }
+            ],
+            "displayFolder": "LeadTimes",
+            "expression": [
+              "",
+              "SUMX(",
+              "    SUMMARIZE(",
+              "        'D_StateLeadTimeSLA',",
+              "        // 'D_StateLeadTimeSLA'[Work ID],",
+              "        \"SLA_LeadTime\", CALCULATE(",
+              "            SUM('D_StateLeadTimeSLA'[SLA_LeadTimeDays]),",
+              "            FILTER(",
+              "                'F_DevOps_WorkItemStates',",
+              "                'F_DevOps_WorkItemStates'[System.State] = RELATED('D_StateLeadTimeSLA'[System.State])",
+              "            )",
+              "        )",
+              "    ),",
+              "    [SLA_LeadTime]",
+              ")"
+            ],
+            "formatString": "0",
+            "lineageTag": "19c3bce5-92d9-4ce7-b2ea-40a1ffd3106c"
+          },
+          {
+            "name": "LT.Diff_SumsSLA_LT.Sumx",
+            "changedProperties": [
+              {
+                "property": "IsHidden"
+              }
+            ],
+            "displayFolder": "LeadTimes",
+            "expression": "[LT.SumxSLA] - [LT.Sumx]",
+            "formatString": "0",
+            "lineageTag": "3b783876-0b89-4b9a-a713-9c6c237fa195"
+          },
+          {
+            "name": "LT.SumDays",
+            "changedProperties": [
+              {
+                "property": "IsHidden"
+              }
+            ],
+            "displayFolder": "LeadTimes",
+            "expression": "SUM(F_DevOps_WorkItemStates[LeadTimeDays])",
+            "formatString": "0",
+            "lineageTag": "56f3ef60-74f0-4496-8ed5-b5a23bc693e4"
+          },
+          {
+            "name": "State4MaxxUpdateIDfilterOnWorkItemID",
+            "changedProperties": [
+              {
+                "property": "IsHidden"
+              }
+            ],
+            "displayFolder": "MaxUpdateID2delete",
+            "expression": [
+              "",
+              "VAR MaxUpdateID = ",
+              "    MAXX(",
+              "        FILTER(",
+              "            'F_DevOps_WorkItemStates',",
+              "            'F_DevOps_WorkItemStates'[Workitem ID] = SELECTEDVALUE('F_DevOps_WorkItemStates'[Workitem ID])",
+              "        ),",
+              "        'F_DevOps_WorkItemStates'[Update ID]",
+              "    )",
+              "RETURN",
+              "    CALCULATE(",
+              "        SELECTEDVALUE('F_DevOps_WorkItemStates'[System.State]),",
+              "        'F_DevOps_WorkItemStates'[Update ID] = MaxUpdateID",
+              "    )"
+            ],
+            "lineageTag": "d7fb006e-b775-4278-98b0-78c6630b5685"
+          },
+          {
+            "name": "MaxUpdateID",
+            "changedProperties": [
+              {
+                "property": "IsHidden"
+              }
+            ],
+            "displayFolder": "MaxUpdateID2delete",
+            "expression": [
+              "",
+              "    MAXX(",
+              "        FILTER(",
+              "            'F_DevOps_WorkItemStates',",
+              "            'F_DevOps_WorkItemStates'[Workitem ID] = SELECTEDVALUE('F_DevOps_WorkItemStates'[Workitem ID])",
+              "        ),",
+              "        'F_DevOps_WorkItemStates'[Update ID]",
+              "    )"
+            ],
+            "formatString": "0",
+            "lineageTag": "3414e864-f52c-4cfe-9761-13d8146ca664"
+          },
+          {
+            "name": "MaxUpdateIDForWorkItem",
+            "changedProperties": [
+              {
+                "property": "IsHidden"
+              }
+            ],
+            "displayFolder": "MaxUpdateID2delete",
+            "expression": [
+              "",
+              "MAXX(",
+              "    FILTER(",
+              "        'F_DevOps_WorkItemStates',",
+              "        'F_DevOps_WorkItemStates'[WorkItem ID] = SELECTEDVALUE('F_DevOps_WorkItemStates'[WorkItem ID])",
+              "    ),",
+              "    'F_DevOps_WorkItemStates'[Update ID]",
+              ")"
+            ],
+            "formatString": "0",
+            "lineageTag": "5a7b711a-37c4-4d5c-9cec-4a8a0bfb1b35"
+          },
+          {
+            "name": "WorkItemID4MaxxUpdateIDfilterOnWorkItemID",
+            "changedProperties": [
+              {
+                "property": "IsHidden"
+              }
+            ],
+            "displayFolder": "MaxUpdateID2delete",
+            "expression": [
+              "",
+              "VAR MaxUpdateID = ",
+              "    MAXX(",
+              "        FILTER(",
+              "            'F_DevOps_WorkItemStates',",
+              "            'F_DevOps_WorkItemStates'[Workitem ID] = SELECTEDVALUE('F_DevOps_WorkItemStates'[Workitem ID])",
+              "        ),",
+              "        'F_DevOps_WorkItemStates'[Update ID]",
+              "    )",
+              "RETURN",
+              "    CALCULATE(",
+              "        SELECTEDVALUE('F_DevOps_WorkItemStates'[WorkItem ID]),",
+              "        'F_DevOps_WorkItemStates'[Update ID] = MaxUpdateID",
+              "    )"
+            ],
+            "formatString": "0",
+            "lineageTag": "1aa9057f-faa3-45e0-bcbb-ac45c3c74499"
+          },
+          {
+            "name": "State4MaxxUpdateIDfilterOnState",
+            "changedProperties": [
+              {
+                "property": "IsHidden"
+              }
+            ],
+            "displayFolder": "MaxUpdateID2delete",
+            "expression": [
+              "",
+              "VAR MaxUpdateID = ",
+              "    MAXX(",
+              "        FILTER(",
+              "            'F_DevOps_WorkItemStates',",
+              "            'F_DevOps_WorkItemStates'[System.State] = SELECTEDVALUE('F_DevOps_WorkItemStates'[System.State])",
+              "        ),",
+              "        'F_DevOps_WorkItemStates'[Update ID]",
+              "    )",
+              "RETURN",
+              "    CALCULATE(",
+              "        SELECTEDVALUE('F_DevOps_WorkItemStates'[System.State]),",
+              "        'F_DevOps_WorkItemStates'[Update ID] = MaxUpdateID",
+              "    )"
+            ],
+            "lineageTag": "81ce6cee-63ef-4bd2-8a3b-46bd76853f10"
+          },
+          {
+            "name": "WorkItemID4MaxxUpdateIDfilterOnState",
+            "changedProperties": [
+              {
+                "property": "IsHidden"
+              }
+            ],
+            "displayFolder": "MaxUpdateID2delete",
+            "expression": [
+              "",
+              "VAR MaxUpdateID = ",
+              "    MAXX(",
+              "        FILTER(",
+              "            'F_DevOps_WorkItemStates',",
+              "            'F_DevOps_WorkItemStates'[System.State] = SELECTEDVALUE('F_DevOps_WorkItemStates'[System.State])",
+              "        ),",
+              "        'F_DevOps_WorkItemStates'[Update ID]",
+              "    )",
+              "RETURN",
+              "    CALCULATE(",
+              "        SELECTEDVALUE('F_DevOps_WorkItemStates'[WorkItem ID]),",
+              "        'F_DevOps_WorkItemStates'[Update ID] = MaxUpdateID",
+              "    )"
+            ],
+            "formatString": "0",
+            "lineageTag": "75d75d6c-8702-499a-8ef9-ba4a052de6cc"
+          },
+          {
+            "name": "LT.MaxALL",
+            "displayFolder": "LTstatistics",
+            "expression": [
+              "",
+              "CALCULATE(",
+              "    MAX('F_DevOps_WorkItemStates'[LeadTimeDays]),",
+              "    ALL('F_DevOps_WorkItemStates'[System.State])",
+              ")"
+            ],
+            "lineageTag": "8e19a422-f580-4fd4-82a5-c07ca224f7cc"
+          },
+          {
+            "name": "LT.Min",
+            "displayFolder": "LTstatistics",
+            "expression": "MIN(F_DevOps_WorkItemStates[LeadTimeDays])",
+            "lineageTag": "70284bab-c7cb-49bd-949a-9dd25a8c0eb7"
+          },
+          {
+            "name": "LT.Average",
+            "displayFolder": "LTstatistics",
+            "expression": "AVERAGE(F_DevOps_WorkItemStates[LeadTimeDays])",
+            "formatString": "0",
+            "lineageTag": "5a611b94-b00a-4bf2-8c75-f3aa8317dd89"
+          },
+          {
+            "name": "LT.MaxPerState",
+            "displayFolder": "LTstatistics",
+            "expression": [
+              "",
+              "CALCULATE(",
+              "    MAX('F_DevOps_WorkItemStates'[LeadTimeDays]),",
+              "    ALLEXCEPT('F_DevOps_WorkItemStates', 'F_DevOps_WorkItemStates'[System.State])",
+              ")"
+            ],
+            "lineageTag": "0698c7aa-32f3-478d-beff-c5f1369fd65d"
+          },
+          {
+            "name": "LT.Max",
+            "displayFolder": "LTstatistics",
+            "expression": "MAX('F_DevOps_WorkItemStates'[LeadTimeDays])",
+            "lineageTag": "be24a0c8-02a9-467d-b13e-c976060b1a9c"
+          },
+          {
+            "name": "LT.MinPerState",
+            "displayFolder": "LTstatistics",
+            "expression": [
+              "",
+              "CALCULATE(",
+              "    MIN('F_DevOps_WorkItemStates'[LeadTimeDays]),",
+              "    ALLEXCEPT('F_DevOps_WorkItemStates', 'F_DevOps_WorkItemStates'[System.State])",
+              ")"
+            ],
+            "formatString": "0",
+            "lineageTag": "3a08a0b1-947e-4d38-bde0-73f8637fc545"
+          },
+          {
+            "name": "LT.AveragePerState",
+            "displayFolder": "LTstatistics",
+            "expression": [
+              "",
+              "CALCULATE(",
+              "    Average('F_DevOps_WorkItemStates'[LeadTimeDays]),",
+              "    ALLEXCEPT('F_DevOps_WorkItemStates', 'F_DevOps_WorkItemStates'[System.State])",
+              ")"
+            ],
+            "formatString": "0",
+            "lineageTag": "9ec38106-943f-4410-b1d3-5deddc7dffc1"
+          }
+        ],
+        "partitions": [
+          {
+            "name": "M_DevOps_WorkItems",
+            "mode": "import",
+            "source": {
+              "expression": [
+                "let",
+                "    Source = Table.FromRows(Json.Document(Binary.Decompress(Binary.FromText(\"i44FAA==\", BinaryEncoding.Base64), Compression.Deflate)), let _t = ((type nullable text) meta [Serialized.Text = true]) in type table [Column1 = _t]),",
+                "    #\"Removed Columns\" = Table.RemoveColumns(Source,{\"Column1\"})",
+                "in",
+                "    #\"Removed Columns\""
+              ],
+              "type": "m"
+            }
+          }
+        ]
+      },
+      {
+        "name": "D_StateLeadTimeSLA",
+        "annotations": [
+          {
+            "name": "PBI_NavigationStepName",
+            "value": "Navigation"
+          },
+          {
+            "name": "PBI_ResultType",
+            "value": "Table"
+          }
+        ],
+        "columns": [
+          {
+            "name": "System.State",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "Automatic"
+              }
+            ],
+            "dataType": "string",
+            "lineageTag": "95b7dc8c-f056-418e-b3bc-65ff19855712",
+            "sourceColumn": "System.State",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "Stage",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "Automatic"
+              }
+            ],
+            "dataType": "string",
+            "lineageTag": "945ca86a-047c-4e99-a7f6-b01c4047e8f6",
+            "sourceColumn": "Stage",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "Phase",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "Automatic"
+              }
+            ],
+            "dataType": "int64",
+            "formatString": "0",
+            "lineageTag": "2f11ffdf-d9b3-4163-89b3-4e2891970082",
+            "sourceColumn": "Phase",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "Step",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "Automatic"
+              }
+            ],
+            "dataType": "int64",
+            "formatString": "0",
+            "lineageTag": "4bae375d-a70b-4a14-a13e-88597cc44812",
+            "sourceColumn": "Step",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "SLA LeadTime",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "Automatic"
+              }
+            ],
+            "dataType": "string",
+            "lineageTag": "beb2051c-5fba-46a6-936b-22cb56bcb01e",
+            "sourceColumn": "SLA LeadTime",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "Comment on SLA LeadTime",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "Automatic"
+              }
+            ],
+            "dataType": "string",
+            "lineageTag": "eb453579-bcb2-4880-8597-e08f1270b3ec",
+            "sourceColumn": "Comment on SLA LeadTime",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "SLA_LeadTimeDays",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "Automatic"
+              }
+            ],
+            "dataType": "int64",
+            "formatString": "0",
+            "lineageTag": "6dc182e3-f82c-41f5-a2dc-9c606efad400",
+            "sourceColumn": "SLA_LeadTimeDays",
+            "summarizeBy": "none"
+          }
+        ],
+        "lineageTag": "86246ee5-71be-45b6-8511-3c36f236bf2e",
+        "partitions": [
+          {
+            "name": "D_StateLeadTimeSLA",
+            "mode": "import",
+            "source": {
+              "expression": [
+                "let",
+                "    Source = Excel.Workbook(",
+                "        File.Contents(",
+                "            \"C:\\Users\\MeisterW\\OneDrive - FUJITSU\\__DEV\\Mitsubishi-DevOpsCR-Report\\Mitsubishi-DevOpsCR_SLA-Input.xlsx\"",
+                "        ),",
+                "        null,",
+                "        true",
+                "    ),",
+                "    StateLeadTimeSLA_Table = Source{[Item = \"StateLeadTimeSLA\", Kind = \"Table\"]}[Data],",
+                "    #\"Changed Type\" = Table.TransformColumnTypes(",
+                "        StateLeadTimeSLA_Table,",
+                "        {",
+                "            {\"System.State\", type text},",
+                "            {\"Stage\", type text},",
+                "            {\"Phase\", Int64.Type},",
+                "            {\"Step\", Int64.Type},",
+                "            {\"SLA LeadTime\", type text},",
+                "            {\"SLA_LeadTimeDays\", Int64.Type},",
+                "            {\"Comment on SLA LeadTime\", type text}",
+                "        }",
+                "    )",
+                "in",
+                "    #\"Changed Type\""
+              ],
+              "type": "m"
+            }
+          }
+        ]
+      },
+      {
+        "name": "D_DevOps_WorkItemStates_MaxUpdateID",
+        "annotations": [
+          {
+            "name": "PBI_Id",
+            "value": "3fac412306054f9b9327d2ba83ae02b2"
+          }
+        ],
+        "columns": [
+          {
+            "name": "WorkItemID_Max",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "User"
+              }
+            ],
+            "dataType": "int64",
+            "formatString": "0",
+            "isDataTypeInferred": true,
+            "isNameInferred": false,
+            "lineageTag": "d59cbd40-fed4-4b68-a975-8478dfacf8da",
+            "sourceColumn": "F_DevOps_WorkItemStates[WorkItem ID]",
+            "summarizeBy": "none",
+            "type": "calculatedTableColumn"
+          },
+          {
+            "name": "WorkItemUpdateID_Max",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "Automatic"
+              }
+            ],
+            "dataType": "string",
+            "expression": [
+              "",
+              "'D_DevOps_WorkItemStates_MaxUpdateID'[WorkItemID_Max] & \"-\" & FORMAT(D_DevOps_WorkItemStates_MaxUpdateID[UpdateID_Max], \"00\")"
+            ],
+            "lineageTag": "91db35c9-b630-46d8-95a8-ce8ae0206ca5",
+            "summarizeBy": "none",
+            "type": "calculated"
+          },
+          {
+            "name": "UpdateID_Max",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "Automatic"
+              }
+            ],
+            "dataType": "int64",
+            "formatString": "0",
+            "isDataTypeInferred": true,
+            "isNameInferred": false,
+            "lineageTag": "890168a6-cdb6-499b-bb4b-74fe1b04b371",
+            "sourceColumn": "[UpdateID_MAX]",
+            "summarizeBy": "none",
+            "type": "calculatedTableColumn"
+          }
+        ],
+        "lineageTag": "57746534-a373-4bd9-a1ab-59286353f588",
+        "partitions": [
+          {
+            "name": "D_DevOps_WorkItemStates_MaxUpdateID",
+            "mode": "import",
+            "source": {
+              "expression": [
+                "",
+                "SUMMARIZE(",
+                "    'F_DevOps_WorkItemStates',",
+                "    'F_DevOps_WorkItemStates'[WorkItem ID],",
+                "    \"UpdateID_MAX\", MAXX(",
+                "        FILTER(",
+                "            'F_DevOps_WorkItemStates',",
+                "            'F_DevOps_WorkItemStates'[WorkItem ID] = EARLIER('F_DevOps_WorkItemStates'[WorkItem ID])",
+                "        ),",
+                "        'F_DevOps_WorkItemStates'[Update ID]",
+                "    )",
+                ")"
+              ],
+              "type": "calculated"
+            }
+          }
+        ]
+      }
+    ]
+  }
+}
