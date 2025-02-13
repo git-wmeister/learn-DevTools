@@ -1,0 +1,4 @@
+# file for git to ignore directories or files listed in this file
+
+# Ignore node_modules directory including all files and subdirectories
+**/tmp/*
