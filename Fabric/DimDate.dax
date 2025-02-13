@@ -1,0 +1,21 @@
+D_Date = ADDCOLUMNS(
+    CALENDARAUTO(),
+    "Year", YEAR([Date]),
+    "Quarter", "Q" & QUARTER([Date]),
+    "Year Quarter", YEAR([Date]) &  " Q" & QUARTER([Date]),
+    "Year MonthNr", FORMAT([Date], "YYYYMM", "en-US"),
+    "Year Month", FORMAT([Date], "YYYY MMMM", "en-US"),
+    "Year Month_DE", FORMAT([Date], "YYYY MMMM", "de-DE"),
+    "Month", FORMAT([Date], "MM", "en-US"),
+    "Month Name", FORMAT([Date],"MMMM", "en-US"),
+    "Month Name_DE", FORMAT([Date],"MMMM", "de-DE"),
+    "Day", DAY([Date]),    
+    "Week of Year", WEEKNUM([Date],2),
+    "Weekday_DE", WEEKDAY([Date],2),
+    "Weekday Name", FORMAT([Date],"dddd", "en-US"),
+    "Weekday Name_DE", FORMAT([Date],"dddd", "de-DE"),
+    "Fiscal Year", YEAR([Date]) - 1 + (MONTH([Date]) >= 4) & "-" & YEAR([Date]) + (MONTH([Date]) >= 4),
+    "FY", "FY" & YEAR([Date]) - 1 + (MONTH([Date]) >= 4),
+    "FY Q", "FY Q" & FORMAT(INT((MOD(MONTH([Date]) - 4 + 12, 12) / 3) + 1), "0"),
+    "FY Quarter", "FY" & YEAR([Date]) - 1 + (MONTH([Date]) >= 4) & " Q" & FORMAT(INT((MOD(MONTH([Date]) - 4 + 12, 12) / 3) + 1), "0")
+)
