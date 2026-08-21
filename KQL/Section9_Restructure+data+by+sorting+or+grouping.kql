@@ -1,0 +1,206 @@
+// This is the query file for the "Restructure data by sorting or grouping" section of the "KQL" course.  
+
+// -------------------------------------------------------------------------------------
+// sort
+
+// Simple sort ascending
+Heartbeat
+| sort by TimeGenerated asc
+
+// Sort descending
+Event
+| sort by EventLevel desc
+
+// Sort by multiple columns
+AzureActivity
+| sort by Level asc, TimeGenerated desc
+
+// Sort after aggregation
+Event
+| summarize EventCount = count() by Source
+| sort by EventCount desc
+
+
+// -------------------------------------------------------------------------------------
+// count
+
+// Simple count
+Heartbeat
+| count
+
+// Count with filter
+Event
+| where EventLevel <= 2
+| count
+
+// Count after more complex filtering
+AzureActivity
+| where Level in ("Information", "Error")
+| where TimeGenerated > ago(24h)
+| count
+
+// -------------------------------------------------------------------------------------
+// summarize
+
+// Summarize count by grouping
+Event
+| summarize TotalEvents = count() by Source
+
+// Two aggregations
+Heartbeat
+| summarize LastHeartbeat = max(TimeGenerated), 
+            HeartbeatCount = count() by Computer
+
+// Multiple aggregations
+Event
+| summarize 
+    TotalEvents = count(),
+    UniqueComputers = dcount(Computer),
+    MinLevel = min(EventLevel),
+    MaxLevel = max(EventLevel)
+    by bin(TimeGenerated, 1h)
+
+
+// -------------------------------------------------------------------------------------
+// top
+
+// Top 10 by time
+Heartbeat
+| top 10 by TimeGenerated desc
+
+// Top events by level
+Event
+| top 5 by EventLevel asc
+
+// Top Azure operations
+AzureActivity
+| summarize OpCount = count() by OperationNameValue
+| top 15 by OpCount desc
+
+// -------------------------------------------------------------------------------------
+// union
+
+// Simple union
+union Event, AzureActivity
+| take 100
+
+// Union with filtering
+union 
+    (Event | where EventLevel == 1),
+    (AzureActivity | where Level == "Information")
+
+
+// -------------------------------------------------------------------------------------
+// Inner join
+
+// Inner join between tables
+Heartbeat
+| join kind=inner (
+    Event
+    | distinct Computer
+) on Computer
+
+// Inner join with additional operators
+// Returns only records that exist in BOTH tables
+// Result: Only computers that have both heartbeats AND events
+Heartbeat
+| where TimeGenerated > ago(24h)
+| distinct Computer
+| join kind=inner (
+    Event
+    | where TimeGenerated > ago(24h)
+    | distinct Computer
+) on Computer
+| project Computer, JoinResult = "Has both Heartbeat and Events"
+
+
+// -------------------------------------------------------------------------------------
+// Left outer join
+
+// Returns ALL records from LEFT table, with matching records from RIGHT table
+// RIGHT table columns will be null if no match
+Heartbeat
+| where TimeGenerated > ago(24h)
+| distinct Computer
+| join kind=leftouter (
+    Event
+    | where TimeGenerated > ago(24h)
+    | summarize EventCount = count() by Computer
+) on Computer
+| extend EventCount = iff(isnull(EventCount), 0, EventCount)
+| project Computer, EventCount, Status = iff(EventCount > 0, "Has Events", "No Events")
+
+// -------------------------------------------------------------------------------------
+// Right outer join
+
+// Returns ALL records from RIGHT table, with matching records from LEFT table
+// LEFT table columns will be null if no match
+Heartbeat
+| where TimeGenerated > ago(24h)
+| distinct Computer, OSType
+| join kind=rightouter (
+    Event
+    | where TimeGenerated > ago(24h)
+    | distinct Computer
+) on Computer
+| extend OSType = iff(isempty(OSType), "Unknown", OSType)
+| project Computer, OSType, Source = "From Events"
+
+// -------------------------------------------------------------------------------------
+// Full outer join
+
+// Returns ALL records from BOTH tables
+// Shows all computers from both heartbeats and events
+Heartbeat
+| where TimeGenerated > ago(24h)
+| distinct Computer
+| extend InHeartbeat = true
+| join kind=fullouter (
+    Event
+    | where TimeGenerated > ago(24h)
+    | distinct Computer
+    | extend InEvents = true
+) on Computer
+| extend 
+    InHeartbeat = iff(isnull(InHeartbeat), false, InHeartbeat),
+    InEvents = iff(isnull(InEvents), false, InEvents)
+| extend Status = case(
+    InHeartbeat and InEvents, "In Both",
+    InHeartbeat, "Heartbeat Only",
+    InEvents, "Events Only",
+    "Unknown")
+| project Computer, Status
+
+// -------------------------------------------------------------------------------------
+// Anti-join
+
+// Returns records from LEFT table that have NO match in RIGHT table
+// Find computers with heartbeats but no events
+Heartbeat
+| where TimeGenerated > ago(24h)
+| distinct Computer
+| join kind=leftanti (
+    Event
+    | where TimeGenerated > ago(24h)
+    | distinct Computer
+) on Computer
+| project Computer, Status = "Has heartbeat but no events"
+
+// -------------------------------------------------------------------------------------
+// range
+
+// Generate range of numbers
+range x from 1 to 10 step 1
+| extend Square = x * x
+
+// Range for creating reference data
+range DayOfWeek from 0 to 6 step 1
+| extend DayName = case(
+    DayOfWeek == 0, "Sunday",
+    DayOfWeek == 1, "Monday",
+    DayOfWeek == 2, "Tuesday",
+    DayOfWeek == 3, "Wednesday",
+    DayOfWeek == 4, "Thursday",
+    DayOfWeek == 5, "Friday",
+    "Saturday")
+| extend IsWeekend = DayOfWeek == 0 or DayOfWeek == 6

@@ -1,0 +1,1 @@
+SELECT * FROM dbo.spt_monitor;

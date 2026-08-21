@@ -1,0 +1,72 @@
+// This is the query file for the "Restructure data to output in a useful way" section of the "KQL" course. 
+
+// -------------------------------------------------------------------------------------
+// let
+
+// Let with table expression
+let RecentEvents = Event | where TimeGenerated > ago(24h);
+RecentEvents
+| summarize count() by Source
+
+// Let with scalar value
+let ThresholdMinutes = 5;
+let StartTime = ago(24h);
+Heartbeat
+| where TimeGenerated > StartTime
+| extend MinutesSinceHeartbeat = datetime_diff('minute', now(), TimeGenerated)
+| where MinutesSinceHeartbeat > ThresholdMinutes
+
+
+
+// -------------------------------------------------------------------------------------
+// parse
+
+// PARSE event ID and description in an example with dummy data
+Event
+| take 10
+| extend SampleDescription = "Event ID 1234: System startup complete"
+| parse SampleDescription with "Event ID " EventIdParsed ": " Description
+| project SampleDescription, EventIdParsed, Description
+
+// PARSE IP addresses and ports
+// Input: "192.168.1.100:8080"
+// Output: IPAddress = "192.168.1.100", Port = "8080"
+AzureActivity
+| take 10
+| extend SampleEndpoint = "192.168.1.100:8080"
+| parse SampleEndpoint with IPAddress ":" Port
+| project SampleEndpoint, IPAddress, Port
+
+
+// -------------------------------------------------------------------------------------
+// render
+
+// Render timechart - basic
+Heartbeat
+| summarize count() by bin(TimeGenerated, 1h)
+| render timechart
+
+
+// Render columnchart
+Event
+| summarize EventCount = count() by Source
+| top 10 by EventCount
+| render columnchart
+
+// Render barchart
+Event
+| summarize EventCount = count() by Source
+| top 10 by EventCount
+| render barchart
+
+// Render piechart
+Event
+| summarize EventCount = count() by Source
+| top 10 by EventCount
+| render piechart
+
+// Render areachart
+Event
+| summarize EventCount = count() by Source
+| top 10 by EventCount
+| render areachart

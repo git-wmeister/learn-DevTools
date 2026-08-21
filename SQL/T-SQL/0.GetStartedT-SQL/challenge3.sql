@@ -15,5 +15,20 @@ SELECT FirstName + ' ' + ISNULL(MiddleName + ' ', '') + LastName AS CutomerName
 FROM SalesLT.Customer
 
 -- 2. Retrieve primary contact details
+ SELECT CustomerID, EmailAddress, Phone 
+ FROM SalesLT.Customer;
+
+/* does not work as intended, because no Pohne value is returned but only EmailAddress
+ without EmailAddress 
+ SELECT CustomerID, ISNULL(EmailAddress, Phone) AS PrimaryContact   
+*/
+ SELECT CustomerID, COALESCE(EmailAddress, Phone) AS PrimaryContact
+ FROM SalesLT.Customer;
 
 -- 3. Retrieve shipping status
+ SELECT SalesOrderID, OrderDate,
+     CASE
+         WHEN ShipDate IS NULL THEN 'Awaiting Shipment'
+         ELSE 'Shipped'
+     END AS ShippingStatus
+ FROM SalesLT.SalesOrderHeader;

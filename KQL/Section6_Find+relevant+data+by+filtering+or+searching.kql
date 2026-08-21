@@ -1,0 +1,121 @@
+// This is the query file for the "Find relevant data by filtering or searching" section of the "KQL" course. 
+
+
+// where
+
+// Basic where - filter events by specific EventID
+Event
+| where EventID == 7036
+
+// Where with comparison - find recent heartbeats
+Heartbeat
+| where TimeGenerated > ago(1h)
+
+// Where with multiple conditions using AND
+AzureActivity
+| where Level == "Informational" and TimeGenerated > ago(24h)
+
+// Where with OR condition
+Event
+| where EventLevel == 1 or EventLevel == 2 or EventLevel == 3 or EventLevel == 4
+
+// Where with NOT condition for Linux
+Heartbeat
+| where OSType != "Linux"
+
+// Where with NOT condition for Windows
+Heartbeat
+| where OSType != "Windows"
+
+// Where with numerical comparison
+Event
+| where EventID > 100
+
+// Where with string comparison
+Event
+| where Source == "Service Control Manager"
+
+// Where combining multiple operators
+Heartbeat
+| where TimeGenerated < ago(6h) and OSType == "Windows"
+
+// -------------------------------------------------------------------------------------
+// where contains / has
+
+// Where contains - case insensitive substring search
+AzureActivity
+| where OperationNameValue contains "microsoft"
+
+// Where has - search for complete terms
+Event
+| where RenderedDescription has "failed"
+
+// Where has_any - search for any of multiple terms
+AzureActivity
+| where OperationNameValue has_any ("write", "delete", "create")
+
+// Where !contains - exclude records containing substring
+Event
+| where Source !contains "Windows"
+
+// Where has_all - must contain all specified terms
+Event
+| where RenderedDescription has_all ("service", "started")
+
+// -------------------------------------------------------------------------------------
+// search
+
+// Basic search across all columns
+search "user"
+
+// Search in specific table
+search in (Event) "user"
+
+// Search with wildcard
+search "virtual*"
+
+// Search for multiple terms
+search "error" or "warning" or "alert"
+
+// Search in specific tables with condition
+search in (AzureActivity, Event) "Microsoft" and TimeGenerated > ago(1h)
+
+// -------------------------------------------------------------------------------------
+// take
+
+// Take first 10 records
+Heartbeat
+| take 10
+
+// Take with where clause
+Event
+| where EventLevel == 2
+| take 5
+
+// -------------------------------------------------------------------------------------
+// case
+
+// Basic case statement for categorization
+Event
+| extend Severity = case(
+    EventLevel == 1, "Critical",
+    EventLevel == 2, "Error",
+    EventLevel == 3, "Warning",
+    EventLevel == 4, "Information", "Unknown")
+
+// -------------------------------------------------------------------------------------
+// distinct
+
+// Get distinct computers
+Heartbeat
+| distinct Computer
+
+// Distinct with multiple columns
+AzureActivity
+| distinct OperationNameValue, Level
+
+// Distinct operation names
+AzureActivity
+| where TimeGenerated > ago(7d)
+| distinct OperationNameValue
+| take 3

@@ -1,0 +1,117 @@
+// This is the query file for the "Add or remove columns in a table" section of the "KQL" course.  
+
+
+//print
+
+// Simple print statement
+print Message = "KQL Demo"
+
+// Simple print statement with timestamp
+print Message = "KQL Demo", Timestamp = now()
+
+// Print with datetime operations
+print CurrentTime = now(), OneWeekAgo = ago(7d)
+
+// Print with calculations
+print DaysInWeek = 7, HoursInDay = 24, MinutesInHour = 60
+
+// Print with string concatenation
+print WelcomeMessage = strcat("Hello", " ", "KQL", " ", "Students")
+
+// Print with mathematical operations
+print Sum = 10 + 20, Product = 10 * 20, Division = 100 / 4
+
+// -------------------------------------------------------------------------------------
+//project
+
+// Basic project - select specific columns
+Heartbeat
+| project Computer, OSType, TimeGenerated
+
+// Project with column renaming
+Event
+| project EventTime = TimeGenerated, EventSource = Source, Level = EventLevel
+
+// Project with calculations
+AzureActivity
+| project OperationNameValue, Level, DurationMinutes = (_TimeReceived - TimeGenerated) / 1m
+
+// Project with new calculated columns
+Heartbeat
+| project Computer, TimeSinceLastBeat = now() - TimeGenerated, OSType
+
+
+// -------------------------------------------------------------------------------------
+//project-away
+
+// Remove specific columns
+Event
+| project-away _ResourceId, _SubscriptionId
+
+// Remove multiple columns
+Heartbeat
+| project-away Type, _ResourceId, TenantId
+
+
+// -------------------------------------------------------------------------------------
+//project-keep
+
+// Keep columns matching pattern
+Event
+| project-keep Event*, TimeGenerated
+
+
+// Keep with wildcard
+AzureActivity
+| project-keep *Name*, Level, TimeGenerated
+
+
+// -------------------------------------------------------------------------------------
+//project-rename
+
+// Rename single column
+Event
+| project-rename EventTime = TimeGenerated
+
+// Rename multiple columns
+Heartbeat
+| project-rename Machine = Computer, OperatingSystem = OSType
+
+// Rename with further operations
+AzureActivity
+| project-rename Operation = OperationNameValue
+| where Operation contains "write"
+| project Operation
+
+
+// -------------------------------------------------------------------------------------
+//project-reorder
+
+// Reorder columns
+Event
+| project-reorder EventLevel, Source, TimeGenerated, *
+
+
+// -------------------------------------------------------------------------------------
+//extend
+
+// Basic extend - add calculated column
+Heartbeat
+| extend MinutesSinceHeartbeat = (now() - TimeGenerated) / 1m
+
+// Extend with multiple columns
+Event
+| extend DayOfWeek = dayofweek(TimeGenerated), Hour = hourofday(TimeGenerated)
+
+// Extend with conditional logic
+AzureActivity
+| extend IsError = iff(Level == "Error", true, false)
+
+// Extend with string operations
+Event
+| extend SourceCategory = substring(Source, 0, 10)
+
+// Project-away after extend
+AzureActivity
+| extend TempColumn = "temp"
+| project-away TempColumn

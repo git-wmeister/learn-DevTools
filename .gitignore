@@ -2,3 +2,4 @@
 
 # Ignore node_modules directory including all files and subdirectories
 **/tmp/*
+SQL/T-SQL/dp-080-Transact-SQL/

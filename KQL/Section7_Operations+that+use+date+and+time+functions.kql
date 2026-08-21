@@ -1,0 +1,68 @@
+// This is the query file for the "Operations that use date and time functions" section of the "KQL" course. 
+
+//ago
+// Simple ago - last hour
+Heartbeat
+| where TimeGenerated > ago(1h)
+
+// Ago with days
+AzureActivity
+| where TimeGenerated > ago(1d)
+
+// Ago with minutes
+Event
+| where TimeGenerated > ago(30m)
+
+// Multiple ago conditions
+Event
+| where TimeGenerated between(ago(7d) .. ago(15m))
+
+// Ago in extend statement
+Heartbeat
+| extend HoursSinceLastHeartbeat = (now() - TimeGenerated) / 1h
+
+// -------------------------------------------------------------------------------------
+// format_datetime
+
+// Format datetime to date only
+AzureActivity
+| extend DateOnly = format_datetime(TimeGenerated, 'yyyy-MM-dd')
+
+// Format datetime to custom format
+Event
+| extend FormattedTime = format_datetime(TimeGenerated, 'yyyy-MM-dd HH:mm:ss')
+
+// Format datetime to day of month
+Heartbeat
+| extend DayOfMonth = format_datetime(TimeGenerated, 'dd')
+
+// Format datetime to month of year
+Heartbeat
+| extend MonthOfYear = format_datetime(TimeGenerated, 'MM')
+
+// Format datetime to year
+Heartbeat
+| extend Year = format_datetime(TimeGenerated, 'yyyy')
+
+// Format datetime for reporting
+Heartbeat
+| extend MonthYear = format_datetime(TimeGenerated, 'MM_yyyy')
+
+// -------------------------------------------------------------------------------------
+// bin
+
+// Bin with print
+print bin(3.6 , 1)
+
+// Bin by 1 hour intervals
+Heartbeat
+| summarize count() by bin(TimeGenerated, 1h)
+
+// Bin by 5 minute intervals
+Event
+| where TimeGenerated > ago(1d)
+| summarize EventCount = count() by bin(TimeGenerated, 5m)
+
+// Bin by day
+AzureActivity
+| summarize DailyOperations = count() by bin(TimeGenerated, 1d)

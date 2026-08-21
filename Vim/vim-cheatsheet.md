@@ -2,7 +2,7 @@
 
 This document based on VS Code Extension "Learn Vim" and "Learning the vi and Vim Editors" by Arnold Robbins, Elbert Hannah & Linda Lamb, O'Reilly.
 
-To do things in Vim you use **commands**. Commands are actions that have an effect in your editor. There's lots of different commands that do different things. **Motions** are commands that you use to move around in **Normal mode** (you'll soon learn that they are capable of a lot more).
+To do things in Vim you use **commands**. Commands are actions that have an effect in your editor. HThere's lots of different commands that do different things. **Motions** are commands that you use to move around in **Normal mode** (you'll soon learn that they are capable of a lot more).
 
 ```txt
           ↑
@@ -18,7 +18,7 @@ To do things in Vim you use **commands**. Commands are actions that have an effe
 
 #### Scrolling the Screen
 
-> `CTRL-f`    Scroll forward one screen.  
+>`CTRL-f`    Scroll forward one screen.  
 `CTRL-b`    Scroll backward one screen.  
 `CTRL-d`    Scroll forward one half screen (down).  
 `CTRL-u`    Scroll backward one half screen (up).  
@@ -33,22 +33,21 @@ To do things in Vim you use **commands**. Commands are actions that have an effe
 
 Find yourself working on a large file? Or perhaps handling multiple buffers? Vim makes it easy to navigate previous locations:
 
-`Ctrl+o` navigate to the previous location in the jump list (think o as old)  
+> `Ctrl+o` navigate to the previous location in the jump list (think o as old)  
 `Ctrl+i` navigate to the next location in the jump list (i and o are usually next to each other)  
 `g;`     go to the previous change location i
 `g,`     go to the newer change location  
 
-`'.`     Jump to last modification line  
+>`'.`     Jump to last modification line  
 ``.`     Jump to exact spot in last modification line  
 
 #### Movement Within a Screen
 
-`H`         Move to home - the top line on screen  
+> `H`         Move to home - the top line on screen  
 `M`         Move to middle line on screen  
 `L`         Move to last line on screen  
 *n*`H`      Move to *n* line below top line  
 *n*`L`      Move to *n* lines above last line  
-*n*`L`      Move to last line on screen  
 
 #### Moving Horizontally Word Test By Word
 
@@ -67,12 +66,13 @@ To the end
 
 To the end of previous
 
-- `ge` to jup to the end of the previous word
+- `ge` to jmup to the end of the previous word
 - `gE` is like `ge` but operates on WORDS
 
 #### Move to a Specific Character
 
 - Use `f{character}` (find) to move to the next occurrence of a character in a line.
+- Use `F{character}` to find the previous occurrence of a character
 - Use `F{character}` to find the previous occurrence of a character
 
 After using `f{character}` you can type  
@@ -99,24 +99,24 @@ You can see the `;` and `,` as commands for repeating the last character search.
 - `-`: Moves to the first non-blank character of a PREVIOUS line
 
 ```txt
-+   
-   +   
-      +   
-         +   
-            +      
-         -
-      -
-   -
--
++  : 
+   +  : 
+      +   :
+         +   :
+            +   :
+         - . 
+      - . 
+   - . 
+-  .
 ```
 
 #### Moving Vertically
 
 Starting from `k` and `j`, we move on to a faster way of maneuvering vertically with:
 
-- `}` jumps entire paragraphs downwards
+> - `}` jumps entire paragraphs downwards
 - `{` similarly but upwards
-- `(` beginning of next sentence
+- `(` beginning of previous sentence
 - `)` beginning of next sentence
 - `CTRL-d` lets you move down half a page by scrolling the page
 - `CTRL-u` lets you move up half a page also by scrolling
@@ -140,6 +140,7 @@ Try using the following search command to find second level headings in this doc
 
 - `2w` to move two words ahead
 - `5j` to jump file lines below
+- `3;` lets you go to the next third occurrence of a character
 - `2/cuc` jumping to the second **cuc**umber
 
 ### And Some More Nifty Core Motions
@@ -204,7 +205,7 @@ Mini-refresher: The **`d`** command
 ## Practice dd and D (Operator shorthand syntax)
 
 `dd` lets you delete a complete line of text.
-`D` is also really useful, it removes everything from the cursor until the end of the line (it is equivalent to `d$` but easier to type). 
+`D` is also really useful, it removes everything from the cursor until the end of the line (it is equivalent to `d$` but easier to type).
 
 ## The Dot Operator
 
@@ -232,7 +233,7 @@ So far we've been focusing a lot in _Normal mode_ and we haven't paid much atten
 - `o` lets you **o**pen a new line below the current line
 - `O` lets you **o**pen a new line above the current line
 
-- <CTRL-O> to come back here type
+- `Ctrl-o` to come back here type
 
 The next handy mapping to jump into _Insert mode_ is `gi`. `gi` let's you go back to the last place where you made a change.
 
@@ -308,7 +309,7 @@ Operators really shine when we combine them with a special class of motions call
 
 Text objects are structured pieces of text or, if you will, the entities of a document domain model. What is a document composed of? Words, sentences, quoted text, paragraphs, blocks, (HTML) tags, etc. These are text objects.
 
-The way that you specify a text object within a command is by combining the letter a (a text object plus whitespace) or i (inner object without whitespace) with a character that represents a text object itself:
+The way that you specify a text object within a command is by combining the letter **a** (a text object plus whitespace) or **i** (inner object without whitespace) with a character that represents a text object itself:
 
 Vim Text Objects
 {operator}{a|i}{text-object}
