@@ -326,7 +326,7 @@ At any point you can view the history of your changes using
 Show all changes: `git log`  
 Show just the last two commits:
 
-`$ $it log -n2`  
+`$ git log -n2`  
 
 ``` txt
 commit 9c8418355b9f6585853f362525060ab62d9c54cf (HEAD -> main)
